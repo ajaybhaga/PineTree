@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+
+<html>
+<head>	
+    <title>NN Stock Predict Data</title>
+
+    <link class="include" rel="stylesheet" type="text/css" href="../jqplot/jquery.jqplot.min.css" />
+    <link rel="stylesheet" type="text/css" href="examples.css" />
+  
+  <!--[if lt IE 9]><script language="javascript" type="text/javascript" src="../excanvas.js"></script><![endif]-->
+    <script class="include" type="text/javascript" src="../jqplot/jquery.min.js"></script>
+    
+    
+    <script type="text/javascript" src="CSVToArray.js"></script>
+    <script type="text/javascript" src="data.js"></script>
+</head>
+<body>
+
+<div class="example-content">
+      
+<!-- Example scripts go here -->
+
+<div id="controller_chart" style="margin:20px;height:240px; width:100%;"></div>
+<div id="price_chart" style="margin:20px;height:240px; width:100%;"></div>
+<div id="macd_chart" style="margin:20px;height:240px; width:100%;"></div>
+<div id="macd_zero_chart" style="margin:20px;height:240px; width:100%;"></div>
+<div id="macd_peak_chart" style="margin:20px;height:240px; width:100%;"></div>
+
+<script type="text/javascript">$(document).ready(function(){
+    $.jqplot.config.enablePlugins = true;
+    
+    controller_plot = $.jqplot('controller_chart',[ohlc],{
+      title: name,
+      axesDefaults:{},
+      axes: {
+          xaxis: {
+              renderer:$.jqplot.DateAxisRenderer
+          },
+          yaxis: {
+              tickOptions:{ prefix: '$' }
+          }
+      },
+      series: [{renderer:$.jqplot.OHLCRenderer, rendererOptions:{candleStick:true,fillUpBody:true,upBodyColor:'#00E000',downBodyColor:'#FF0000'}}],
+      
+      cursor:{
+          zoom:true,
+          constrainZoomTo: 'x',
+          tooltipOffset: 10,
+          tooltipLocation: 'nw'
+      },
+      highlighter: {
+          showMarker:false,
+          tooltipAxes: 'xy',
+          yvalues: 4,
+          formatString:'<table class="jqplot-highlighter"> \
+          <tr><td>Date:</td><td>%s</td></tr> \
+          <tr><td>Open:</td><td>%s</td></tr> \
+          <tr><td>High:</td><td>%s</td></tr> \
+          <tr><td>Low:</td><td>%s</td></tr> \
+          <tr><td>Close:</td><td>%s</td></tr></table>'
+      }
+    });
+    
+    
+    plot1 = $.jqplot('price_chart',[ohlc],{
+      title: 'Price',
+      axesDefaults:{},
+      axes: {
+          xaxis: {
+              renderer:$.jqplot.DateAxisRenderer
+          },
+          yaxis: {
+              tickOptions:{ prefix: '$' }
+          }
+      },
+      series: [{renderer:$.jqplot.OHLCRenderer, rendererOptions:{candleStick:true,fillUpBody:true,upBodyColor:'#00E000',downBodyColor:'#FF0000'}}],
+      
+      cursor:{
+          zoom:true,
+          constrainZoomTo: 'x',
+          tooltipOffset: 10,
+          tooltipLocation: 'nw'
+      },
+      highlighter: {
+          showMarker:false,
+          tooltipAxes: 'xy',
+          yvalues: 4,
+          formatString:'<table class="jqplot-highlighter"> \
+          <tr><td>Date:</td><td>%s</td></tr> \
+          <tr><td>Open:</td><td>%s</td></tr> \
+          <tr><td>High:</td><td>%s</td></tr> \
+          <tr><td>Low:</td><td>%s</td></tr> \
+          <tr><td>Close:</td><td>%s</td></tr></table>'
+      }
+    });
+    
+    plot2 = $.jqplot('macd_chart',[macd],{
+      title: 'MACD',
+      axesDefaults:{},
+      axes: {
+          xaxis: {
+              renderer:$.jqplot.DateAxisRenderer
+          },
+          yaxis: {
+              tickOptions:{ prefix: '' }
+          }
+      },
+
+      series:[{lineWidth:2, color: '#711D9F'}],
+      
+      
+      cursor:{
+          zoom:true,
+          constrainZoomTo: 'x',
+          tooltipOffset: 10,
+          tooltipLocation: 'nw'
+      },
+      highlighter: {
+          showMarker:false,
+          tooltipAxes: 'xy',
+          yvalues: 4,
+          formatString:'<table class="jqplot-highlighter"> \
+          <tr><td>Date:</td><td>%s</td></tr> \
+          <tr><td>Value:</td><td>%s</td></tr> \
+          </table>'
+      }
+    });
+    
+    plot3 = $.jqplot('macd_zero_chart',[macdZeroScore],{
+      title: 'MACD Zero Chart',
+      axesDefaults:{},
+      axes: {
+          xaxis: {
+              renderer:$.jqplot.DateAxisRenderer
+          },
+          yaxis: {
+              tickOptions:{ prefix: '' }
+          }
+      },
+
+      series:[{lineWidth:2, color: '#9F1D40'}],
+      
+      
+      cursor:{
+          zoom:true,
+          constrainZoomTo: 'x',
+          tooltipOffset: 10,
+          tooltipLocation: 'nw'
+      },
+      highlighter: {
+          showMarker:false,
+          tooltipAxes: 'xy',
+          yvalues: 4,
+          formatString:'<table class="jqplot-highlighter"> \
+          <tr><td>Date:</td><td>%s</td></tr> \
+          <tr><td>Value:</td><td>%s</td></tr> \
+          </table>'
+      }
+    });
+    
+    plot4 = $.jqplot('macd_peak_chart',[macdPeakScore],{
+      title: 'MACD Peak Chart',
+      axesDefaults:{},
+      axes: {
+          xaxis: {
+              renderer:$.jqplot.DateAxisRenderer
+          },
+          yaxis: {
+              tickOptions:{ prefix: '' }
+          }
+      },
+
+      series:[{lineWidth:2, color: '#1D9F4F'}],
+      
+      
+      cursor:{
+          zoom:true,
+          constrainZoomTo: 'x',
+          tooltipOffset: 10,
+          tooltipLocation: 'nw'
+      },
+      highlighter: {
+          showMarker:false,
+          tooltipAxes: 'xy',
+          yvalues: 4,
+          formatString:'<table class="jqplot-highlighter"> \
+          <tr><td>Date:</td><td>%s</td></tr> \
+          <tr><td>Value:</td><td>%s</td></tr> \
+          </table>'
+      }
+    });
+
+$.jqplot.Cursor.zoomProxy(plot1, controller_plot);
+$.jqplot.Cursor.zoomProxy(plot2, controller_plot);
+$.jqplot.Cursor.zoomProxy(plot3, controller_plot);
+$.jqplot.Cursor.zoomProxy(plot4, controller_plot);
+
+
+});
+
+
+</script>
+
+
+
+<!-- End example scripts -->
+
+<!-- Don't touch this! -->
+    <script class="include" type="text/javascript" src="../jqplot/jquery.jqplot.min.js"></script>
+<!-- End Don't touch this! -->
+
+<!-- Additional plugins go here -->
+
+    <script class="include" type="text/javascript" src="../jqplot/plugins/jqplot.dateAxisRenderer.min.js"></script>
+    <script class="include" type="text/javascript" src="../jqplot/plugins/jqplot.categoryAxisRenderer.min.js"></script>
+    <script class="include" type="text/javascript" src="../jqplot/plugins/jqplot.ohlcRenderer.min.js"></script>
+    <script class="include" type="text/javascript" src="../jqplot/plugins/jqplot.highlighter.min.js"></script>
+    <script class="include" type="text/javascript" src="../jqplot/plugins/jqplot.cursor.min.js"></script>
+
+<!-- End additional plugins -->
+
+</div>
+
+</body>
+
+</html>
