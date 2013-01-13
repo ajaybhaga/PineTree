@@ -7,6 +7,7 @@
 package com.nnstockpredict.data.indicator;
 
 import com.nnstockpredict.Utility.PeakFinder;
+import com.nnstockpredict.Utility.Response;
 import java.util.List;
 
 public class MACDPeakScore extends StockIndicator {
@@ -23,7 +24,16 @@ public class MACDPeakScore extends StockIndicator {
         
         System.out.println("Detecting peaks in MACD values...");
         // Detect all peaks
-        List[] arrayOfLists = PeakFinder.detectPeaks(macdValue, 0.2);
+        List[] arrayOfLists = PeakFinder.detectPeaks(macdValue, 0.5);
+        
+        Response response = PeakFinder.peakFind(macdValue, -1.0, 0, 1);
+        
+        System.out.println("PEAK FINDER:");
+        for (int i = 0; i < response.getIndexArray().length; i++) {
+            System.out.println("Peak Find: Index[" + i + "] = " + response.getIndexArray()[i]);
+            System.out.println("Peak Find: Value[" + i + "] = " + response.getValueArray()[i]);
+        }
+        
         // Maxima list
         List<Integer> maxIdxList = arrayOfLists[PeakFinder.MAX_LIST];
         // Minima list
