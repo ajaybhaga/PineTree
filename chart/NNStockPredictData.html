@@ -37,7 +37,7 @@
               renderer:$.jqplot.DateAxisRenderer
           },
           yaxis: {
-              tickOptions:{ prefix: '$' }
+              tickOptions:{ prefix: '$', formatString: "%#.2f" }
           }
       },
       series: [{renderer:$.jqplot.OHLCRenderer, rendererOptions:{candleStick:true,fillUpBody:true,upBodyColor:'#00E000',downBodyColor:'#FF0000'}}],
@@ -70,7 +70,7 @@
               renderer:$.jqplot.DateAxisRenderer
           },
           yaxis: {
-              tickOptions:{ prefix: '$' }
+              tickOptions:{ prefix: '$', formatString: "%#.2f" }
           }
       },
       series: [{renderer:$.jqplot.OHLCRenderer, rendererOptions:{candleStick:true,fillUpBody:true,upBodyColor:'#00E000',downBodyColor:'#FF0000'}}],
