@@ -20,14 +20,15 @@ public class MACDPeakScore extends StockIndicator {
         super(name, size);
     }
 
-    public void calculate(double[] inputClose, double[] macdValue, int macdBegIdx, int maxBegIdx, int maxLength) {
+    public void calculate2(double[] inputClose, double[] macdValue, int macdBegIdx, int maxBegIdx, int maxLength) {
         
         System.out.println("Detecting peaks in MACD values...");
         // Detect all peaks
         List[] arrayOfLists = PeakFinder.detectPeaks(macdValue, 0.5);
         
-        Response response = PeakFinder.peakFind(macdValue, -1.0, 0, 1);
-        
+        //Response response = PeakFinder.peakFind(macdValue, -1.0, 0, 1);
+         Response response = PeakFinder.peakFind(macdValue, 0.02, 0, 1);
+         
         System.out.println("PEAK FINDER:");
         for (int i = 0; i < response.getIndexArray().length; i++) {
             System.out.println("Peak Find: Index[" + i + "] = " + response.getIndexArray()[i]);
@@ -149,17 +150,57 @@ public class MACDPeakScore extends StockIndicator {
                 }
             }
         }
+               
+        for (int i = 0; i < maxLength; i++) {
+            value[i] = 0;
+        }        
+         
+        for (int i = 0; i < response.getIndexArray().length; i++) {
+     //       System.out.println("Peak Find: Index[" + i + "] = " + response.getIndexArray()[i]);
+    //        System.out.println("Peak Find: Value[" + i + "] = " + response.getValueArray()[i]);
+            value[response.getIndexArray()[i]] = response.getValueArray()[i];
+        }
                 
         // We only copy over starting from the valid MACD values
-        for (int i = 0; i < maxLength; i++) {
+        /*for (int i = 0; i < maxLength; i++) {
             value[i] = rawValue[macdI+i];
-        }        
+        } */       
 
         // Manually set the begin and length values
         begIdx.value = 0;
         length.value = value.length;
     }
 
+    
+    public void calculate(double[] inputClose, double[] macdValue, int macdBegIdx, int maxBegIdx, int maxLength) {
+        
+        System.out.println("Detecting peaks in MACD values...");
+        // Detect all peaks        
+        //Response response = PeakFinder.peakFind(macdValue, -1.0, 0, 1);
+         Response response = PeakFinder.peakFind(macdValue, 0.005, 0, 1);
+         
+        System.out.println("PEAK FINDER:");
+        for (int i = 0; i < response.getIndexArray().length; i++) {
+            System.out.println("Peak Find: Index[" + i + "] = " + response.getIndexArray()[i]);
+            System.out.println("Peak Find: Value[" + i + "] = " + response.getValueArray()[i]);
+        }
+        
+        // Instantiate new values (this will store the score)
+        value = new double[maxLength];
+                      
+        
+        for (int i = 0; i < response.getIndexArray().length; i++) {
+     //       System.out.println("Peak Find: Index[" + i + "] = " + response.getIndexArray()[i]);
+    //        System.out.println("Peak Find: Value[" + i + "] = " + response.getValueArray()[i]);
+            value[response.getIndexArray()[i]] = response.getValueArray()[i];
+        }
+        
+        // Manually set the begin and length values
+        begIdx.value = 0;
+        length.value = value.length;
+    }
+
+    
     @Override
     public void calculate(double[] inputHigh, double[] inputLow, double[] inputVolume, double[] inputOpen, double[] inputClose) {
         throw new UnsupportedOperationException("Not supported yet.");

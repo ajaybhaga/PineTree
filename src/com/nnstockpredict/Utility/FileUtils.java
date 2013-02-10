@@ -183,36 +183,36 @@ public class FileUtils {
             output.write("];\n");
 
             output.write("macd = [");
-            for (int i = 0; i < chartData.getInputClose().length; i++) {
-                String dateStr = format.format(chartData.getInputDate()[i]);
+            for (int i = 0; i < chartData.getMACD().getLength(); i++) {
+                String dateStr = format.format(chartData.getInputDate()[chartData.getMaxBegIdx()+i]);
 
                 output.write("['" + dateStr + "'," + chartData.getMACD().getValues()[i] + "]");
 
-                if (i != chartData.getInputClose().length - 1) {
+                if (i != chartData.getMACD().getLength() - 1) {
                     output.write(",");
                 }
             }
             output.write("];\n");
-
+            
             output.write("macdZeroScore = [");
-            for (int i = 0; i < chartData.getMaxLength(); i++) {
-                String dateStr = format.format(chartData.getInputDate()[i]);
+            for (int i = 0; i < chartData.getMACDZeroScore().getLength(); i++) {
+                String dateStr = format.format(chartData.getInputDate()[chartData.getMaxBegIdx()+i]);
 
                 output.write("['" + dateStr + "'," + chartData.getMACDZeroScore().getValues()[i] + "]");
 
-                if (i != chartData.getInputClose().length - 1) {
+                if (i != chartData.getMACDZeroScore().getLength() - 1) {
                     output.write(",");
                 }
             }
             output.write("];\n");
                  
             output.write("macdPeakScore = [");
-            for (int i = 0; i < chartData.getMaxLength(); i++) {
-                String dateStr = format.format(chartData.getInputDate()[i]);
+            for (int i = 0; i < chartData.getMACDPeakScore().getLength(); i++) {
+                String dateStr = format.format(chartData.getInputDate()[chartData.getMaxBegIdx()+i]);
 
                 output.write("['" + dateStr + "'," + chartData.getMACDPeakScore().getValues()[i] + "]");
 
-                if (i != chartData.getInputClose().length - 1) {
+                if (i != chartData.getMACDPeakScore().getLength() - 1) {
                     output.write(",");
                 }
             }

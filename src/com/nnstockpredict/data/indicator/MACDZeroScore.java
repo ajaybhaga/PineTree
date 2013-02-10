@@ -37,6 +37,8 @@ public class MACDZeroScore extends StockIndicator {
         // Manually set the begin and length values
         begIdx.value = 0;
         length.value = value.length;
+        
+        System.out.println("MACDZERO SIZE: " + value.length);
     }
 
     @Override

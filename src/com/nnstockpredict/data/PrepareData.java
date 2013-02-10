@@ -222,7 +222,7 @@ public class PrepareData {
         adxTrendScore.setUseAsInput(true);
         stockIndicatorList.add(adxTrendScore);
 
-        MACDPeakScore macdPeakScore = new MACDPeakScore("MACD Peak Score", inputClose.length);
+        MACDPeakScore macdPeakScore = new MACDPeakScore("MACD Peak Score", maxLength);
         macdPeakScore.calculate(inputClose, macd.getValues(), macd.getBegIdx(), maxBegIdx, maxLength);
         macdPeakScore.setUseAsInput(true);
         stockIndicatorList.add(macdPeakScore);

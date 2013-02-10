@@ -29,5 +29,7 @@ public class MACD extends StockIndicator {
         double[] macdSignal = new double[value.length];
         double[] macdHist = new double[value.length];
         checkRange(core.macd(0, inputClose.length - 1, inputClose, 12, 26, 9, begIdx, length, value, macdSignal, macdHist));
+        
+        System.out.println("MACD SIZE: " + length.value);
     }
 }
