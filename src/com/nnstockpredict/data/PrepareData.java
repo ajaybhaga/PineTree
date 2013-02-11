@@ -263,32 +263,59 @@ public class PrepareData {
         
         
         // Load from 'FCL' file
-        String fileName = "data/fcl/tipper.fcl";
-        FIS fis = FIS.load(fileName,true);
+        String fileName = "data/fcl/candlestick.fcl";
+        FIS candleStickFis = FIS.load(fileName, true);
         // Error while loading?
-        if( fis == null ) { 
+        if( candleStickFis == null ) { 
             System.err.println("Can't load file: '" 
                                    + fileName + "'");
             return;
         }
+        
+        // Set inputs
+        candleStickFis.setVariable("a", 0);
+        candleStickFis.setVariable("b", 5);
+        candleStickFis.setVariable("c", 10);
+        candleStickFis.setVariable("d", 15);
+        candleStickFis.setVariable("open", 3.10);
+        candleStickFis.setVariable("close", 10.20);
+        candleStickFis.setVariable("size", 0);
 
         // Show 
-        fis.chart();
-
-        // Set inputs
-        fis.setVariable("service", 3);
-        fis.setVariable("food", 7);
-
+        //candleStickFis.chart();
+        
         // Evaluate
-        fis.evaluate();
+        candleStickFis.evaluate();                
 
         // Show output variable's chart 
-        fis.getVariable("tip").chartDefuzzifier(true);
+        //candleStickFis.getVariable("colour").chartDefuzzifier(true);
 
+        System.out.println("Defuzzify (colour): " + candleStickFis.getVariable("colour").defuzzify());
+        System.out.println("Value (size): " + candleStickFis.getVariable("size").getValue());
+        
         // Print ruleSet
-        System.out.println(fis);
-        
-        
+        System.out.println(candleStickFis);
+   /*                             
+        // Load from 'FCL' file
+        String fileName2 = "data/fcl/pattern.fcl";
+        FIS patternFis = FIS.load(fileName2, true);
+        // Error while loading?
+        if( patternFis == null ) { 
+            System.err.println("Can't load file: '" 
+                                   + fileName2 + "'");
+            return;
+        }
+                        
+        // Set inputs
+        candleStickFis.setVariable("curr_colour", 0);
+        candleStickFis.setVariable("curr_size", 5);
+        candleStickFis.setVariable("curr_open", 10);
+        candleStickFis.setVariable("curr_close", 15);
+        candleStickFis.setVariable("prev_colour", 0);
+        candleStickFis.setVariable("prev_size", 5);
+        candleStickFis.setVariable("prev_open", 10);
+        candleStickFis.setVariable("prev_close", 15);        
+        */
         //int globalSize = minEndIdx - maxBegIdx + 1;
         for (StockIndicator stockIndicator : stockIndicatorList) {
             if (stockIndicator.useAsInput()) {
