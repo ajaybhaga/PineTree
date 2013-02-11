@@ -4,6 +4,7 @@ import com.nnstockpredict.Utility.ArrayUtil;
 import com.nnstockpredict.Utility.FileUtils;
 import com.nnstockpredict.data.indicator.*;
 import java.util.*;
+import net.sourceforge.jFuzzyLogic.FIS;
 import org.encog.ml.data.MLData;
 import org.encog.ml.data.MLDataPair;
 import org.encog.ml.data.MLDataSet;
@@ -259,6 +260,34 @@ public class PrepareData {
 
         ChartData chartData = new ChartData(ticker.getSymbol(), inputDate, inputOpen, inputHigh, inputLow, inputClose, maxBegIdx, maxLength, macd, macdPeakScore, macdZeroScore);        
         FileUtils.writeChartData(chartData);
+        
+        
+        // Load from 'FCL' file
+        String fileName = "data/fcl/tipper.fcl";
+        FIS fis = FIS.load(fileName,true);
+        // Error while loading?
+        if( fis == null ) { 
+            System.err.println("Can't load file: '" 
+                                   + fileName + "'");
+            return;
+        }
+
+        // Show 
+        fis.chart();
+
+        // Set inputs
+        fis.setVariable("service", 3);
+        fis.setVariable("food", 7);
+
+        // Evaluate
+        fis.evaluate();
+
+        // Show output variable's chart 
+        fis.getVariable("tip").chartDefuzzifier(true);
+
+        // Print ruleSet
+        System.out.println(fis);
+        
         
         //int globalSize = minEndIdx - maxBegIdx + 1;
         for (StockIndicator stockIndicator : stockIndicatorList) {
