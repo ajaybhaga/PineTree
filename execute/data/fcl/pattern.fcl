@@ -3,35 +3,108 @@ FUNCTION_BLOCK pattern
 
 // Define input variables
 VAR_INPUT
-    curr_colour : REAL;
-    curr_size : REAL;
-    curr_open : REAL;
-    curr_close : REAL;
-    prev_colour : REAL;
-    prev_size : REAL;
-    prev_open : REAL;
-    prev_close : REAL;
+    short_start_value : REAL;
+    short_start_value_plus_one : REAL;
+    short_end_value : REAL;
+    middle_start_value : REAL;
+    middle_start_value_plus_one : REAL;
+    middle_end_value : REAL;
+    long_start_value : REAL;
+    long_end_value : REAL;
+
+    low_value : REAL;
+    equal_low_value : REAL;
+    equal_low_value_plus_one : REAL;
+    equal_value : REAL;
+    equal_high_value : REAL;
+    high_value : REAL;
 END_VAR
 
 // Define output variable
 VAR_OUTPUT
-    engulfing : REAL;
+    pattern : REAL;
 END_VAR
 
-// Fuzzify input variable 'curr_colour'
-FUZZIFY curr_colour
+// Fuzzify input variable 'trend'
+FUZZIFY trend
+    TERM up := 1;
+    TERM down := 0;
+END_FUZZIFY
+
+// Fuzzify input variable 'line0_body'
+FUZZIFY line0_body
+    TERM equal := (0,1) (short_start_value,0);
+    TERM short := (0,0) (short_start_value,1) (short_end_value,1) (middle_start_value, 0); 
+    TERM above_short := (0,0) (short_start_value,0) (short_start_value_plus_one,1);
+    TERM middle := (short_end_value,0) (middle_start_value,1) (middle_end_value,1) (long_start_value,0);
+    TERM above_middle := (0,0) (middle_start_value,0) (middle_start_value_plus_one,1);
+    TERM long := (middle_end_value,0) (long_start_value,1) (long_end_value,1);
+END_FUZZIFY
+
+// Fuzzify input variable 'line0_body_colour'
+FUZZIFY line0_body_colour
     TERM white := 1;
     TERM black := 0;
 END_FUZZIFY
 
-// Fuzzify input variable 'prev_colour'
-FUZZIFY prev_colour
+// Fuzzify input variable 'line0_open_style'
+FUZZIFY line0_open_style
+    TERM low := (0,1) (equal_low_value,0);
+    TERM equal_low := trian 0 equal_low_value equal_value;
+    TERM above_equal_low := (0,0) (equal_low_value,0) (equal_low_value_plus_one,1);
+    TERM equal := trian equal_low_value equal_value equal_high_value;
+    TERM equal_high := trian equal_value equal_high_value high_value;
+    TERM high := (equal_high_value,0) (high_value,1);
+END_FUZZIFY
+
+// Fuzzify input variable 'line0_close_style'
+FUZZIFY line0_close_style
+    TERM low := (0,1) (equal_low_value,0);
+    TERM equal_low := trian 0 equal_low_value equal_value;
+    TERM above_equal_low := (0,0) (equal_low_value,0) (equal_low_value_plus_one,1);
+    TERM equal := trian equal_low_value equal_value equal_high_value;
+    TERM equal_high := trian equal_value equal_high_value high_value;
+    TERM high := (equal_high_value,0) (high_value,1);
+END_FUZZIFY
+
+// Fuzzify input variable 'line1_body'
+FUZZIFY line1_body
+    TERM equal := (0,1) (short_start_value,0);
+    TERM short := (0,0) (short_start_value,1) (short_end_value,1) (middle_start_value, 0); 
+    TERM above_short := (0,0) (short_start_value,0) (short_start_value_plus_one,1);
+    TERM middle := (short_end_value,0) (middle_start_value,1) (middle_end_value,1) (long_start_value,0);
+    TERM above_middle := (0,0) (middle_start_value,0) (middle_start_value_plus_one,1);
+    TERM long := (middle_end_value,0) (long_start_value,1) (long_end_value,1);
+END_FUZZIFY
+
+// Fuzzify input variable 'line1_body_colour'
+FUZZIFY line1_body_colour
     TERM white := 1;
     TERM black := 0;
 END_FUZZIFY
 
-// Defuzzify output variable 'engulfing'
-DEFUZZIFY engulfing
+// Fuzzify input variable 'line1_open_style'
+FUZZIFY line1_open_style
+    TERM low := (0,1) (equal_low_value,0);
+    TERM equal_low := trian 0 equal_low_value equal_value;
+    TERM above_equal_low := (0,0) (equal_low_value,0) (equal_low_value_plus_one,1);
+    TERM equal := trian equal_low_value equal_value equal_high_value;
+    TERM equal_high := trian equal_value equal_high_value high_value;
+    TERM high := (equal_high_value,0) (high_value,1);
+END_FUZZIFY
+
+// Fuzzify input variable 'line1_close_style'
+FUZZIFY line1_close_style
+    TERM low := (0,1) (equal_low_value,0);
+    TERM equal_low := trian 0 equal_low_value equal_value;
+    TERM above_equal_low := (0,0) (equal_low_value,0) (equal_low_value_plus_one,1);
+    TERM equal := trian equal_low_value equal_value equal_high_value;
+    TERM equal_high := trian equal_value equal_high_value high_value;
+    TERM high := (equal_high_value,0) (high_value,1);
+END_FUZZIFY
+
+// Defuzzify output variable 'pattern'
+DEFUZZIFY pattern
     TERM bullish := 1;
     TERM bearish := 0;
     // Use 'Center Of Gravity' defuzzification method
@@ -49,11 +122,11 @@ RULEBLOCK No1
     // Use 'max' accumulation method
     ACCU : MAX;
 
-    RULE 1 : IF prev_colour IS black AND curr_colour IS white AND curr_close > prev_open AND curr_open < prev_close
-                THEN engulfing IS bullish;
+    //RULE 1 : IF prev_colour IS black AND curr_colour IS white AND curr_close > prev_open AND curr_open < prev_close
+     //           THEN engulfing IS bullish;
 
-    RULE 2 : IF prev_colour IS white AND curr_colour IS black AND curr_close < prev_open AND curr_open > prev_close
-                THEN engulfing IS bearish;
+//    RULE 2 : IF prev_colour IS white AND curr_colour IS black AND curr_close < prev_open AND curr_open > prev_close
+ //               THEN engulfing IS bearish;
 END_RULEBLOCK
 
 END_FUNCTION_BLOCK

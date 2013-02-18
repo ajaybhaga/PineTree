@@ -263,38 +263,76 @@ public class PrepareData {
         
         
         // Load from 'FCL' file
-        String fileName = "data/fcl/candlestick.fcl";
-        FIS candleStickFis = FIS.load(fileName, true);
+        String fileName = "data/fcl/pattern.fcl";
+        FIS fis = FIS.load(fileName, true);
         // Error while loading?
-        if( candleStickFis == null ) { 
+        if( fis == null ) { 
             System.err.println("Can't load file: '" 
                                    + fileName + "'");
             return;
         }
         
-        // Set inputs
-        candleStickFis.setVariable("a", 0);
-        candleStickFis.setVariable("b", 5);
-        candleStickFis.setVariable("c", 10);
-        candleStickFis.setVariable("d", 15);
-        candleStickFis.setVariable("open", 3.10);
-        candleStickFis.setVariable("close", 10.20);
-        candleStickFis.setVariable("size", 0);
+        /*VAR_INPUT
+    short_start_value : REAL;
+    short_end_value : REAL;
+    middle_start_value : REAL;
+    middle_end_value : REAL;
+    long_start_value : REAL;
+    long_end_value : REAL;
 
+    low_value : REAL;
+    equal_low_value : REAL;
+    equal_value : REAL;
+    equal_high_value : REAL;
+    high_value : REAL;
+END_VAR
+*/
+        
+        // Set inputs  
+        // Range values
+        fis.setVariable("short_start_value", 1);
+        fis.setVariable("short_start_value_plus_one", 1+1);
+        fis.setVariable("short_end_value", 3);
+        fis.setVariable("middle_start_value", 5);
+        fis.setVariable("middle_start_value_plus_one", 5+1);
+        fis.setVariable("middle_end_value", 8);
+        fis.setVariable("long_start_value", 10);
+        fis.setVariable("long_end_value", 14);
+       
+        fis.setVariable("low_value", 4);
+        fis.setVariable("equal_low_value", 12);
+        fis.setVariable("equal_low_value_plus_one", 12+1);
+        fis.setVariable("equal_value", 16);
+        fis.setVariable("equal_high_value", 20);
+        fis.setVariable("high_value", 25);
+        
+
+        // Input values
+        fis.setVariable("trend", 1);
+        fis.setVariable("line0_body", 14);
+        fis.setVariable("line0_body_colour", 1);
+        fis.setVariable("line0_open_style", open_value);
+        fis.setVariable("line0_close_style", close_value);
+
+        fis.setVariable("line1_body", 1);
+        fis.setVariable("line1_body_colour", 1);
+        fis.setVariable("line1_open_style", 1);
+        fis.setVariable("line1_close_style", 1);
+        
         // Show 
-        //candleStickFis.chart();
+        fis.chart();
         
         // Evaluate
-        candleStickFis.evaluate();                
+        fis.evaluate();                
 
         // Show output variable's chart 
         //candleStickFis.getVariable("colour").chartDefuzzifier(true);
 
-        System.out.println("Defuzzify (colour): " + candleStickFis.getVariable("colour").defuzzify());
-        System.out.println("Value (size): " + candleStickFis.getVariable("size").getValue());
+        //System.out.println("Defuzzify (colour): " + fis.getVariable("colour").defuzzify());
+        //System.out.println("Value (size): " + fis.getVariable("size").getValue());
         
         // Print ruleSet
-        System.out.println(candleStickFis);
+        System.out.println(fis);
    /*                             
         // Load from 'FCL' file
         String fileName2 = "data/fcl/pattern.fcl";
