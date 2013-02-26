@@ -5,6 +5,7 @@ import com.nnstockpredict.Utility.FileUtils;
 import com.nnstockpredict.data.indicator.*;
 import java.util.*;
 import net.sourceforge.jFuzzyLogic.FIS;
+import net.sourceforge.jFuzzyLogic.rule.Variable;
 import org.encog.ml.data.MLData;
 import org.encog.ml.data.MLDataPair;
 import org.encog.ml.data.MLDataSet;
@@ -18,6 +19,8 @@ import org.encog.ml.data.market.loader.MarketLoader;
 
 public class PrepareData {
 
+    public final static int COLOUR_BLACK = 0;
+    public final static int COLOUR_WHITE = 1;
     /**
      * The serial id.
      */
@@ -97,7 +100,7 @@ public class PrepareData {
         }
 
         List<StockIndicator> stockIndicatorList = new ArrayList<StockIndicator>(10);
-       
+
         OpenPrice openPrice = new OpenPrice("Open Price", inputOpen.length);
         openPrice.setUseAsInput(true);
         openPrice.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
@@ -112,7 +115,7 @@ public class PrepareData {
         lowPrice.setUseAsInput(true);
         lowPrice.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
         stockIndicatorList.add(lowPrice);
-        
+
         ClosePrice closePrice = new ClosePrice("Close Price", inputClose.length);
         closePrice.setUseAsInput(true);
         closePrice.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
@@ -145,6 +148,9 @@ public class PrepareData {
         ema10.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
         stockIndicatorList.add(ema10);
 
+        EMA30 ema30 = new EMA30("EMA 30", inputClose.length);
+        ema30.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
+        stockIndicatorList.add(ema30);
 
 
         /*
@@ -241,6 +247,7 @@ public class PrepareData {
 
         System.out.println("EMA5 = " + ema5.getMostRecentValue() + ", idx = " + (ema5.getLength() - 1));
         System.out.println("EMA10 = " + ema10.getMostRecentValue() + ", idx = " + (ema10.getLength() - 1));
+        System.out.println("EMA30 = " + ema30.getMostRecentValue() + ", idx = " + (ema30.getLength() - 1));
         System.out.println("RSI = " + rsi.getMostRecentValue() + ", idx = " + (rsi.getLength() - 1));
         System.out.println("Stoch = " + stoch.getMostRecentValue() + ", idx = " + (stoch.getLength() - 1));
         System.out.println("Stoch F = " + stochF.getMostRecentValue() + ", idx = " + (stochF.getLength() - 1));
@@ -258,102 +265,166 @@ public class PrepareData {
         System.out.println("maxBegIdx { inputDate: " + inputDate[maxBegIdx] + ", price: " + inputClose[maxBegIdx] + " }");
         System.out.println("maxLength { inputDate: " + inputDate[maxBegIdx + maxLength - 1] + ", price: " + inputClose[maxBegIdx + maxLength - 1] + " }");
 
-        ChartData chartData = new ChartData(ticker.getSymbol(), inputDate, inputOpen, inputHigh, inputLow, inputClose, maxBegIdx, maxLength, macd, macdPeakScore, macdZeroScore);        
+        ChartData chartData = new ChartData(ticker.getSymbol(), inputDate, inputOpen, inputHigh, inputLow, inputClose, maxBegIdx, maxLength, macd, macdPeakScore, macdZeroScore);
         FileUtils.writeChartData(chartData);
-        
-        
+
+
         // Load from 'FCL' file
         String fileName = "data/fcl/pattern.fcl";
         FIS fis = FIS.load(fileName, true);
         // Error while loading?
-        if( fis == null ) { 
-            System.err.println("Can't load file: '" 
-                                   + fileName + "'");
+        if (fis == null) {
+            System.err.println("Can't load file: '"
+                    + fileName + "'");
             return;
         }
-        
-        /*VAR_INPUT
-    short_start_value : REAL;
-    short_end_value : REAL;
-    middle_start_value : REAL;
-    middle_end_value : REAL;
-    long_start_value : REAL;
-    long_end_value : REAL;
 
-    low_value : REAL;
-    equal_low_value : REAL;
-    equal_value : REAL;
-    equal_high_value : REAL;
-    high_value : REAL;
-END_VAR
-*/
-        
-        // Set inputs  
-        // Range values
-        fis.setVariable("short_start_value", 1);
-        fis.setVariable("short_start_value_plus_one", 1+1);
-        fis.setVariable("short_end_value", 3);
-        fis.setVariable("middle_start_value", 5);
-        fis.setVariable("middle_start_value_plus_one", 5+1);
-        fis.setVariable("middle_end_value", 8);
-        fis.setVariable("long_start_value", 10);
-        fis.setVariable("long_end_value", 14);
-       
-        fis.setVariable("low_value", 4);
-        fis.setVariable("equal_low_value", 12);
-        fis.setVariable("equal_low_value_plus_one", 12+1);
-        fis.setVariable("equal_value", 16);
-        fis.setVariable("equal_high_value", 20);
-        fis.setVariable("high_value", 25);
-        
+        double low = 0;
+        double equal_low = 0;
+        double equal = 0;
+        double equal_high = 0;
+        double high = 0;
 
-        // Input values
-        fis.setVariable("trend", 1);
-        fis.setVariable("line0_body", 14);
-        fis.setVariable("line0_body_colour", 1);
-        fis.setVariable("line0_open_style", open_value);
-        fis.setVariable("line0_close_style", close_value);
+        for (int j = maxBegIdx; j < maxBegIdx + maxLength; j++) {
 
-        fis.setVariable("line1_body", 1);
-        fis.setVariable("line1_body_colour", 1);
-        fis.setVariable("line1_open_style", 1);
-        fis.setVariable("line1_close_style", 1);
-        
-        // Show 
-        fis.chart();
-        
-        // Evaluate
-        fis.evaluate();                
+            //     if (!inputDate[j].toString().contains("Mon Jun 11 00:00:00 EDT 2012")) {
+            //        continue;
+            //   }
 
-        // Show output variable's chart 
-        //candleStickFis.getVariable("colour").chartDefuzzifier(true);
+            double thirtyDayFluctTotal = ema30.getMaxValue() - ema30.getMinValue();
 
-        //System.out.println("Defuzzify (colour): " + fis.getVariable("colour").defuzzify());
-        //System.out.println("Value (size): " + fis.getVariable("size").getValue());
-        
-        // Print ruleSet
-        System.out.println(fis);
-   /*                             
-        // Load from 'FCL' file
-        String fileName2 = "data/fcl/pattern.fcl";
-        FIS patternFis = FIS.load(fileName2, true);
-        // Error while loading?
-        if( patternFis == null ) { 
-            System.err.println("Can't load file: '" 
-                                   + fileName2 + "'");
-            return;
+            double f = 0.25; // Body sizing factor
+            double short_start = ((0.5 * f) / 100.0) * thirtyDayFluctTotal;
+            double short_end = ((1.5 * f) / 100.0) * thirtyDayFluctTotal;
+            double middle_start = ((2.5 * f) / 100.0) * thirtyDayFluctTotal;
+            double middle_end = ((3.5 * f) / 100.0) * thirtyDayFluctTotal;
+            double long_start = ((5.0 * f) / 100.0) * thirtyDayFluctTotal;
+            double long_end = ((14.0 * f) / 100.0) * thirtyDayFluctTotal;
+
+            // Set inputs
+            // Body values
+            fis.setVariable("short_start_value", short_start);
+            fis.setVariable("short_start_value_plus_one", short_start + 1);
+            fis.setVariable("short_end_value", short_end);
+            fis.setVariable("middle_start_value", middle_start);
+            fis.setVariable("middle_start_value_plus_one", middle_start + 1);
+            fis.setVariable("middle_end_value", middle_end);
+            fis.setVariable("long_start_value", long_start);
+            fis.setVariable("long_end_value", long_end);
+
+            System.out.println("FUZZY I/O { inputDate: " + inputDate[j] + " }:");
+
+            // Body values
+            System.out.println("short_start_value: " + short_start);
+            System.out.println("short_start_value_plus_one: " + short_start + 1);
+            System.out.println("short_end_value: " + short_end);
+            System.out.println("middle_start_value: " + middle_start);
+            System.out.println("middle_start_value_plus_one: " + middle_start + 1);
+            System.out.println("middle_end_value: " + middle_end);
+            System.out.println("long_start_value:" + long_start);
+            System.out.println("long_end_value:" + long_end);
+
+
+            // Retrieve open/close style for previous day
+
+            // Do min to be inclusive of current candle being lesser than previous
+            low = Math.min(inputLow[j - 1], inputLow[j]);
+            // Do max to be inclusive of current candle being larger than previous
+            high = Math.max(inputHigh[j - 1], inputHigh[j]);
+            equal_low = Math.min(inputOpen[j - 1], inputClose[j - 1]);
+            equal_high = Math.max(inputOpen[j - 1], inputClose[j - 1]);
+            equal = (equal_low + equal_high) / 2.0;
+
+            // Style values
+            fis.setVariable("line0_low_value", low);
+            fis.setVariable("line0_equal_low_value", equal_low);
+            fis.setVariable("line0_equal_low_value_plus_one", equal_low + 1);
+            fis.setVariable("line0_equal_value", equal);
+            fis.setVariable("line0_equal_high_value", equal_high);
+            fis.setVariable("line0_high_value", high);
+
+            // Style values
+            System.out.println("line0_low_value: " + low);
+            System.out.println("line0_equal_low_value: " + equal_low);
+            System.out.println("line0_equal_low_value_plus_one: " + equal_low + 1);
+            System.out.println("line0_equal_value: " + equal);
+            System.out.println("line0_equal_high_value: " + equal_high);
+            System.out.println("line0_high_value: " + high);
+
+            // Do min to be inclusive of current candle being lesser than previous
+            low = Math.min(inputLow[j - 2], inputLow[j - 1]);
+            // Do max to be inclusive of current candle being larger than previous
+            high = Math.max(inputHigh[j - 2], inputHigh[j - 1]);
+            equal_low = Math.min(inputOpen[j - 2], inputClose[j - 2]);
+            equal_high = Math.max(inputOpen[j - 2], inputClose[j - 2]);
+            equal = (equal_low + equal_high) / 2.0;
+
+            // Style values
+            fis.setVariable("line1_low_value", low);
+            fis.setVariable("line1_equal_low_value", equal_low);
+            fis.setVariable("line1_equal_low_value_plus_one", equal_low + 1);
+            fis.setVariable("line1_equal_value", equal);
+            fis.setVariable("line1_equal_high_value", equal_high);
+            fis.setVariable("line1_high_value", high);
+
+            // Style values
+            System.out.println("line1_low_value: " + low);
+            System.out.println("line1_equal_low_value: " + equal_low);
+            System.out.println("line1_equal_low_value_plus_one: " + equal_low + 1);
+            System.out.println("line1_equal_value: " + equal);
+            System.out.println("line1_equal_high_value: " + equal_high);
+            System.out.println("line1_high_value: " + high);
+
+            // Input values
+            fis.setVariable("trend", ((ema5.getValues()[j] > ema10.getValues()[j]) ? 1 : 0));
+            fis.setVariable("line1_body", inputHigh[j - 1] - inputLow[j - 1]);
+            fis.setVariable("line1_body_colour", (inputClose[j - 1] > inputOpen[j - 1]) ? COLOUR_WHITE : COLOUR_BLACK);
+            fis.setVariable("line1_open_style", inputOpen[j - 1]);
+            fis.setVariable("line1_close_style", inputClose[j - 1]);
+
+            fis.setVariable("line0_body", inputHigh[j] - inputLow[j]);
+            fis.setVariable("line0_body_colour", (inputClose[j] > inputOpen[j]) ? COLOUR_WHITE : COLOUR_BLACK);
+            fis.setVariable("line0_open_style", inputOpen[j]);
+            fis.setVariable("line0_close_style", inputClose[j]);
+
+            // Input values
+            System.out.println("ema5: " + ema5.getValues()[j]);
+            System.out.println("ema10: " + ema10.getValues()[j]);
+            System.out.println("trend: " + ((ema5.getValues()[j] > ema10.getValues()[j]) ? 1 : 0));
+
+            System.out.println("line1_body: " + (inputHigh[j - 1] - inputLow[j - 1]));
+            System.out.println("line1_body_colour: " + ((inputClose[j - 1] > inputOpen[j - 1]) ? COLOUR_WHITE : COLOUR_BLACK));
+            System.out.println("line1_open_style: " + inputOpen[j - 1]);
+            System.out.println("line1_close_style: " + inputClose[j - 1]);
+
+            System.out.println("line0_body: " + (inputHigh[j] - inputLow[j]));
+            System.out.println("line0_body_colour: " + ((inputClose[j] > inputOpen[j]) ? COLOUR_WHITE : COLOUR_BLACK));
+            System.out.println("line0_open_style: " + inputOpen[j]);
+            System.out.println("line0_close_style: " + inputClose[j]);
+
+
+            // Show
+            //fis.chart();
+
+            // Evaluate
+            fis.evaluate();
+
+
+            // Show output variable's chart
+            //candleStickFis.getVariable("colour").chartDefuzzifier(true);
+
+            //System.out.println("Defuzzify (colour): " + fis.getVariable("colour").defuzzify());
+            //System.out.println("Value (size): " + fis.getVariable("size").getValue());
+
+            // Print ruleSet
+            //System.out.println(fis);
+
+            Variable variable = fis.getVariable("pattern");
+
+            System.out.println("[inputDate: " + inputDate[j] + "]: PATTERN DETECTION = " + variable.getValue());
+
         }
-                        
-        // Set inputs
-        candleStickFis.setVariable("curr_colour", 0);
-        candleStickFis.setVariable("curr_size", 5);
-        candleStickFis.setVariable("curr_open", 10);
-        candleStickFis.setVariable("curr_close", 15);
-        candleStickFis.setVariable("prev_colour", 0);
-        candleStickFis.setVariable("prev_size", 5);
-        candleStickFis.setVariable("prev_open", 10);
-        candleStickFis.setVariable("prev_close", 15);        
-        */
+
         //int globalSize = minEndIdx - maxBegIdx + 1;
         for (StockIndicator stockIndicator : stockIndicatorList) {
             if (stockIndicator.useAsInput()) {
@@ -438,12 +509,12 @@ END_VAR
             } else {
                 downList.add(dataWindow);
             }
-            
-            
-            System.out.println("Day #" + (j+1) + ": " + dataWindow + ", direction = " + d);           
+
+
+            System.out.println("Day #" + (j + 1) + ": " + dataWindow + ", direction = " + d);
         }
-        
-   
+
+
         // Create training data set
         trainingSet = new BasicMLDataSet();
 

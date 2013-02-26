@@ -1,3 +1,4 @@
+// Author: Ajay Bhaga
 // Block definition (there may be more than one block per file)
 FUNCTION_BLOCK pattern
 
@@ -12,12 +13,19 @@ VAR_INPUT
     long_start_value : REAL;
     long_end_value : REAL;
 
-    low_value : REAL;
-    equal_low_value : REAL;
-    equal_low_value_plus_one : REAL;
-    equal_value : REAL;
-    equal_high_value : REAL;
-    high_value : REAL;
+    line0_low_value : REAL;
+    line0_equal_low_value : REAL;
+    line0_equal_low_value_plus_one : REAL;
+    line0_equal_value : REAL;
+    line0_equal_high_value : REAL;
+    line0_high_value : REAL;
+
+    line1_low_value : REAL;
+    line1_equal_low_value : REAL;
+    line1_equal_low_value_plus_one : REAL;
+    line1_equal_value : REAL;
+    line1_equal_high_value : REAL;
+    line1_high_value : REAL;
 END_VAR
 
 // Define output variable
@@ -49,22 +57,22 @@ END_FUZZIFY
 
 // Fuzzify input variable 'line0_open_style'
 FUZZIFY line0_open_style
-    TERM low := (0,1) (equal_low_value,0);
-    TERM equal_low := trian 0 equal_low_value equal_value;
-    TERM above_equal_low := (0,0) (equal_low_value,0) (equal_low_value_plus_one,1);
-    TERM equal := trian equal_low_value equal_value equal_high_value;
-    TERM equal_high := trian equal_value equal_high_value high_value;
-    TERM high := (equal_high_value,0) (high_value,1);
+    TERM low := (line0_low_value,1) (line0_equal_low_value,0);
+    TERM equal_low := trian line0_low_value line0_equal_low_value line0_equal_value;
+    TERM above_equal_low := (line0_low_value,0) (line0_equal_low_value,0) (line0_equal_low_value_plus_one,1);
+    TERM equal := trian line0_equal_low_value line0_equal_value line0_equal_high_value;
+    TERM equal_high := trian line0_equal_value line0_equal_high_value line0_high_value;
+    TERM high := (line0_equal_high_value,0) (line0_high_value,1);
 END_FUZZIFY
 
 // Fuzzify input variable 'line0_close_style'
 FUZZIFY line0_close_style
-    TERM low := (0,1) (equal_low_value,0);
-    TERM equal_low := trian 0 equal_low_value equal_value;
-    TERM above_equal_low := (0,0) (equal_low_value,0) (equal_low_value_plus_one,1);
-    TERM equal := trian equal_low_value equal_value equal_high_value;
-    TERM equal_high := trian equal_value equal_high_value high_value;
-    TERM high := (equal_high_value,0) (high_value,1);
+    TERM low := (line0_low_value,1) (line0_equal_low_value,0);
+    TERM equal_low := trian line0_low_value line0_equal_low_value line0_equal_value;
+    TERM above_equal_low := (line0_low_value,0) (line0_equal_low_value,0) (line0_equal_low_value_plus_one,1);
+    TERM equal := trian line0_equal_low_value line0_equal_value line0_equal_high_value;
+    TERM equal_high := trian line0_equal_value line0_equal_high_value line0_high_value;
+    TERM high := (line0_equal_high_value,0) (line0_high_value,1);
 END_FUZZIFY
 
 // Fuzzify input variable 'line1_body'
@@ -85,28 +93,28 @@ END_FUZZIFY
 
 // Fuzzify input variable 'line1_open_style'
 FUZZIFY line1_open_style
-    TERM low := (0,1) (equal_low_value,0);
-    TERM equal_low := trian 0 equal_low_value equal_value;
-    TERM above_equal_low := (0,0) (equal_low_value,0) (equal_low_value_plus_one,1);
-    TERM equal := trian equal_low_value equal_value equal_high_value;
-    TERM equal_high := trian equal_value equal_high_value high_value;
-    TERM high := (equal_high_value,0) (high_value,1);
+    TERM low := (line1_low_value,1) (line1_equal_low_value,0);
+    TERM equal_low := trian line1_low_value line1_equal_low_value line1_equal_value;
+    TERM above_equal_low := (line1_low_value,0) (line1_equal_low_value,0) (line1_equal_low_value_plus_one,1);
+    TERM equal := trian line1_equal_low_value line1_equal_value line1_equal_high_value;
+    TERM equal_high := trian line1_equal_value line1_equal_high_value line1_high_value;
+    TERM high := (line1_equal_high_value,0) (line1_high_value,1);
 END_FUZZIFY
 
 // Fuzzify input variable 'line1_close_style'
 FUZZIFY line1_close_style
-    TERM low := (0,1) (equal_low_value,0);
-    TERM equal_low := trian 0 equal_low_value equal_value;
-    TERM above_equal_low := (0,0) (equal_low_value,0) (equal_low_value_plus_one,1);
-    TERM equal := trian equal_low_value equal_value equal_high_value;
-    TERM equal_high := trian equal_value equal_high_value high_value;
-    TERM high := (equal_high_value,0) (high_value,1);
+    TERM low := (line1_low_value,1) (line1_equal_low_value,0);
+    TERM equal_low := trian line1_low_value line1_equal_low_value line1_equal_value;
+    TERM above_equal_low := (line1_low_value,0) (line1_equal_low_value,0) (line1_equal_low_value_plus_one,1);
+    TERM equal := trian line1_equal_low_value line1_equal_value line1_equal_high_value;
+    TERM equal_high := trian line1_equal_value line1_equal_high_value line1_high_value;
+    TERM high := (line1_equal_high_value,0) (line1_high_value,1);
 END_FUZZIFY
 
 // Defuzzify output variable 'pattern'
 DEFUZZIFY pattern
-    TERM bullish := 1;
-    TERM bearish := 0;
+    TERM bullish_engulfing := 0.79;
+    TERM bearish_engulfing := 0.21;
     // Use 'Center Of Gravity' defuzzification method
     METHOD : COGS;
     // Default value is 0 (if no rule activates defuzzifier)
@@ -122,11 +130,22 @@ RULEBLOCK No1
     // Use 'max' accumulation method
     ACCU : MAX;
 
-    //RULE 1 : IF prev_colour IS black AND curr_colour IS white AND curr_close > prev_open AND curr_open < prev_close
-     //           THEN engulfing IS bullish;
+    RULE 1 : IF trend IS up AND line0_open_style IS high AND line0_close_style IS low
+             AND line0_body IS above_middle AND line0_body_colour IS black AND line1_open_style IS above_equal_low
+             AND line1_close_style IS high AND line1_body IS above_short AND line1_body_colour IS white
+             THEN pattern IS bearish_engulfing;
 
-//    RULE 2 : IF prev_colour IS white AND curr_colour IS black AND curr_close < prev_open AND curr_open > prev_close
- //               THEN engulfing IS bearish;
+    RULE 2 : IF trend IS down AND line0_open_style IS high AND line0_close_style IS low
+             AND line0_body IS above_middle AND line0_body_colour IS black AND line1_open_style IS above_equal_low
+             AND line1_close_style IS high AND line1_body IS above_short AND line1_body_colour IS white
+             THEN pattern IS bearish_engulfing;
+
+
+ //   RULE 2 : IF trend IS up AND line0_open_style IS high AND line0_close_style IS low
+  //           AND line0_body IS above_middle AND line0_body_colour IS black
+   //          THEN pattern IS drop;
+
+  
 END_RULEBLOCK
 
 END_FUNCTION_BLOCK
