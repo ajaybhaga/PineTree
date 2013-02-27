@@ -52,6 +52,7 @@ END_FUZZIFY
 // Fuzzify input variable 'line0_body_colour'
 FUZZIFY line0_body_colour
     TERM white := 1;
+    TERM cross := 0.5;
     TERM black := 0;
 END_FUZZIFY
 
@@ -88,6 +89,7 @@ END_FUZZIFY
 // Fuzzify input variable 'line1_body_colour'
 FUZZIFY line1_body_colour
     TERM white := 1;
+    TERM cross := 0.5;
     TERM black := 0;
 END_FUZZIFY
 
@@ -136,16 +138,12 @@ RULEBLOCK No1
              THEN pattern IS bearish_engulfing;
 
     RULE 2 : IF trend IS down AND line0_open_style IS high AND line0_close_style IS low
-             AND line0_body IS above_middle AND line0_body_colour IS black AND line1_open_style IS above_equal_low
-             AND line1_close_style IS high AND line1_body IS above_short AND line1_body_colour IS white
-             THEN pattern IS bearish_engulfing;
+             AND line0_body IS above_middle AND line0_body_colour IS white 
+             AND (line1_open_style IS equal OR line1_open_style IS equal_low OR line1_open_style IS low)
+             AND (line1_close_style IS equal OR line1_close_style IS equal_low OR line1_close_style IS low)
+             AND line1_body IS above_short AND line1_body_colour IS black
+             THEN pattern IS bullish_engulfing;
 
-
- //   RULE 2 : IF trend IS up AND line0_open_style IS high AND line0_close_style IS low
-  //           AND line0_body IS above_middle AND line0_body_colour IS black
-   //          THEN pattern IS drop;
-
-  
 END_RULEBLOCK
 
 END_FUNCTION_BLOCK
