@@ -199,7 +199,6 @@ public class LinguisticVariable {
         int i = 0;
         while (it.hasNext()) {
             String name = (String) it.next();
-            System.out.println("name = " + name);
             MembershipFunction mf = (MembershipFunction) storage.get(name);
             array[i] = mf;
             i++;
@@ -358,10 +357,6 @@ public class LinguisticVariable {
             System.out.println("value is NaN for " + this.getLVName());
         }
         
-        System.out.println("value for " + this.getLVName() + " is:" + value);
-        System.out.println("universeMin:" + universeMin);
-        System.out.println("universeMax:" + universeMax);
-
         //---
         // Plot deffuzyfier values (if any)
         //---

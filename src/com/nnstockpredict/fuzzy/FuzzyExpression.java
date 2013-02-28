@@ -82,7 +82,7 @@ public double  executeExpression(double value, String label) throws EvaluationEx
 {
 	double temp = value;
 
-        System.out.println("executeExpression(MF={"+MF+"},temp={"+temp+"}) before hedges");
+        //System.out.println("executeExpression(MF={"+MF+"},temp={"+temp+"}) before hedges");
 
 	//Apply hedges if needed
 	for (Enumeration en = hedges.elements() ; en.hasMoreElements() ;) 
@@ -90,7 +90,7 @@ public double  executeExpression(double value, String label) throws EvaluationEx
 	    	temp = ((Hedge)en.nextElement()).hedgeIt(temp, LV.getMembershipFunctionByName(MF), LV.getInputValue());
 	 	}
         
-        System.out.println("executeExpression(MF={"+MF+"},temp={"+temp+"}) after hedges");
+        //System.out.println("executeExpression(MF={"+MF+"},temp={"+temp+"}) after hedges");
 
 	//Perform evaluation
 	if(LV!=null && MF!=null)

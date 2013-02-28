@@ -28,20 +28,12 @@ public class HedgeBelow extends Hedge {
                 return -1.0D;
             }
         }
-
-        System.out.println("mf = " + mf.getName());
-        System.out.println("first x hitting max = " + d);
-        System.out.println("x = " + x);
-        System.out.println("value = " + value);
-
+       
         if (x <= d - 1.0D) {
-            System.out.println("hedged above to = " + 1.0D);
             return 1.0D;
         } else if (x <= d) {
-            System.out.println("hedged above to = " + (d - x));
             return d - x;
-        }
-        System.out.println("hedged above to = " + 0.0D);
+        }       
         return 0.0D;
     }
 }

@@ -276,14 +276,10 @@ public class PrepareData {
         double equal_high = 0;
         double high = 0;
 
+        List<Integer> patternIdList = new LinkedList<Integer>();
         int patternCount = 0;
 
         for (int j = maxBegIdx; j < maxBegIdx + maxLength; j++) {
-
-
-            //     if (!inputDate[j].toString().contains("Mon Jun 11 00:00:00 EDT 2012")) {
-            //        continue;
-            //   }
 
             FuzzyEngine fuzzyEngine = null;
             FuzzyBlockOfRules fuzzyRules;
@@ -292,10 +288,14 @@ public class PrepareData {
             LinguisticVariable c0BodyColour = null;
             LinguisticVariable c0OpenStyle = null;
             LinguisticVariable c0CloseStyle = null;
+            LinguisticVariable c0UpperShadow = null;
+            LinguisticVariable c0LowerShadow = null;
             LinguisticVariable c1Body = null;
             LinguisticVariable c1BodyColour = null;
             LinguisticVariable c1OpenStyle = null;
             LinguisticVariable c1CloseStyle = null;
+            LinguisticVariable c1UpperShadow = null;
+            LinguisticVariable c1LowerShadow = null;
             LinguisticVariable pattern = null;
 
             fuzzyEngine = new FuzzyEngine();
@@ -304,9 +304,28 @@ public class PrepareData {
             trend.add("consolidating", 0.5D, 1.0D, 1.0D, 1.5D);
             trend.add("up", 1.0D, 1.5D, 1.5D, 2.0D);
 
+            String patternName;
+            int patternId;
             pattern = new LinguisticVariable("pattern");
-            pattern.add("bullish_engulfing", 0.0D, 1.0D, 1.0D, 0.0D);
-            pattern.add("bearish_engulfing", 1.0D, 2.0D, 2.0D, 3.0D);
+            patternName = Candlestick.PATTERN_NAME_HAMMER;
+            patternId = Candlestick.HAMMER;
+            pattern.add(patternName, patternId - 1.0D, patternId, patternId, patternId + 1.0D);
+
+            patternName = Candlestick.PATTERN_NAME_BULLISH_SEPARATING_LINES;
+            patternId = Candlestick.BULLISH_SEPARATING_LINES;
+            pattern.add(patternName, patternId - 1.0D, patternId, patternId, patternId + 1.0D);
+
+            patternName = Candlestick.PATTERN_NAME_SHOOTING_STAR;
+            patternId = Candlestick.SHOOTING_STAR;
+            pattern.add(patternName, patternId - 1.0D, patternId, patternId, patternId + 1.0D);
+
+            patternName = Candlestick.PATTERN_NAME_BEARISH_ENGULFING;
+            patternId = Candlestick.BEARISH_ENGULFING;
+            pattern.add(patternName, patternId - 1.0D, patternId, patternId, patternId + 1.0D);
+
+            patternName = Candlestick.PATTERN_NAME_BULLISH_ENGULFING;
+            patternId = Candlestick.BULLISH_ENGULFING;
+            pattern.add(patternName, patternId - 1.0D, patternId, patternId, patternId + 1.0D);
 
             c0BodyColour = new LinguisticVariable("c0BodyColour");
             c0BodyColour.add("black", 0.0D, 0.5D, 0.5D, 1.0D);
@@ -330,28 +349,28 @@ public class PrepareData {
             double long_end = ((14.0 * f) / 100.0) * thirtyDayFluctTotal;
 
             c0Body = new LinguisticVariable("c0Body");
-            c0Body.add("equal", 0.0D, 1.0D, 1.0D, short_start);
+            c0Body.add("equal", 0.0D, (short_start / 2.0D), (short_start / 2.0D), short_start);
             c0Body.add("short", 0.0D, short_start, short_end, middle_start);
             c0Body.add("middle", short_end, middle_start, middle_end, long_start);
             c0Body.add("long", middle_end, long_start, long_end, long_end);
 
             c1Body = new LinguisticVariable("c1Body");
-            c1Body.add("equal", 0.0D, 1.0D, 1.0D, short_start);
+            c1Body.add("equal", 0.0D, (short_start / 2.0D), (short_start / 2.0D), short_start);
             c1Body.add("short", 0.0D, short_start, short_end, middle_start);
             c1Body.add("middle", short_end, middle_start, middle_end, long_start);
             c1Body.add("long", middle_end, long_start, long_end, long_end);
 
-            System.out.println("FUZZY I/O { inputDate: " + inputDate[j] + " }:");
+            //System.out.println("FUZZY I/O { inputDate: " + inputDate[j] + " } -----------------------------------");
 
             // Body values
-            System.out.println("short_start_value: " + short_start);
-            System.out.println("short_start_value_plus_one: " + short_start + 1);
-            System.out.println("short_end_value: " + short_end);
-            System.out.println("middle_start_value: " + middle_start);
-            System.out.println("middle_start_value_plus_one: " + middle_start + 1);
-            System.out.println("middle_end_value: " + middle_end);
-            System.out.println("long_start_value:" + long_start);
-            System.out.println("long_end_value:" + long_end);
+            //System.out.println("short_start_value: " + short_start);
+            //System.out.println("short_start_value_plus_one: " + short_start + 1);
+            //System.out.println("short_end_value: " + short_end);
+            //System.out.println("middle_start_value: " + middle_start);
+            //System.out.println("middle_start_value_plus_one: " + middle_start + 1);
+            //System.out.println("middle_end_value: " + middle_end);
+            //System.out.println("long_start_value:" + long_start);
+            //System.out.println("long_end_value:" + long_end);
 
 
             // Retrieve open/close style for previous day
@@ -378,13 +397,17 @@ public class PrepareData {
             c0CloseStyle.add("equal_high", equal, equal_high, equal_high, high);
             c0CloseStyle.add("high", equal_high, high, high, high);
 
-            // Style values
-            System.out.println("line0_low_value: " + low);
-            System.out.println("line0_equal_low_value: " + equal_low);
-            System.out.println("line0_equal_low_value_plus_one: " + equal_low + 1);
-            System.out.println("line0_equal_value: " + equal);
-            System.out.println("line0_equal_high_value: " + equal_high);
-            System.out.println("line0_high_value: " + high);
+            c0UpperShadow = new LinguisticVariable("c0UpperShadow");
+            c0UpperShadow.add("equal", 0.0D, (short_start / 2.0D), (short_start / 2.0D), short_start);
+            c0UpperShadow.add("short", 0.0D, short_start, short_end, middle_start);
+            c0UpperShadow.add("middle", short_end, middle_start, middle_end, long_start);
+            c0UpperShadow.add("long", middle_end, long_start, long_end, long_end);
+
+            c0LowerShadow = new LinguisticVariable("c0LowerShadow");
+            c0LowerShadow.add("equal", 0.0D, (short_start / 2.0D), (short_start / 2.0D), short_start);
+            c0LowerShadow.add("short", 0.0D, short_start, short_end, middle_start);
+            c0LowerShadow.add("middle", short_end, middle_start, middle_end, long_start);
+            c0LowerShadow.add("long", middle_end, long_start, long_end, long_end);
 
             // Do min to be inclusive of current candle being lesser than previous
             low = Math.min(inputLow[j - 2], inputLow[j - 1]);
@@ -408,14 +431,17 @@ public class PrepareData {
             c1CloseStyle.add("equal_high", equal, equal_high, equal_high, high);
             c1CloseStyle.add("high", equal_high, high, high, high);
 
-            // Style values
-            System.out.println("line1_low_value: " + low);
-            System.out.println("line1_equal_low_value: " + equal_low);
-            System.out.println("line1_equal_low_value_plus_one: " + equal_low + 1);
-            System.out.println("line1_equal_value: " + equal);
-            System.out.println("line1_equal_high_value: " + equal_high);
-            System.out.println("line1_high_value: " + high);
+            c1UpperShadow = new LinguisticVariable("c1UpperShadow");
+            c1UpperShadow.add("equal", 0.0D, (short_start / 2.0D), (short_start / 2.0D), short_start);
+            c1UpperShadow.add("short", 0.0D, short_start, short_end, middle_start);
+            c1UpperShadow.add("middle", short_end, middle_start, middle_end, long_start);
+            c1UpperShadow.add("long", middle_end, long_start, long_end, long_end);
 
+            c1LowerShadow = new LinguisticVariable("c1LowerShadow");
+            c1LowerShadow.add("equal", 0.0D, (short_start / 2.0D), (short_start / 2.0D), short_start);
+            c1LowerShadow.add("short", 0.0D, short_start, short_end, middle_start);
+            c1LowerShadow.add("middle", short_end, middle_start, middle_end, long_start);
+            c1LowerShadow.add("long", middle_end, long_start, long_end, long_end);
 
             /*            String rulesString =
              "if trend is up and "
@@ -425,11 +451,22 @@ public class PrepareData {
              */
 
             String rulesString =
-              "if trend is up and "
+                    Candlestick.RULE_HAMMER + "\n"
+                    + Candlestick.RULE_BULLISH_SEPARATING_LINES + "\n"
+                    + Candlestick.RULE_SHOOTING_STAR + "\n"
+                    + Candlestick.RULE_BEARISH_ENGULFING + "\n"
+                    + Candlestick.RULE_BULLISH_ENGULFING;
+            /*                    // Bearish engulfing
+             "if trend is up and "
              + "c0OpenStyle is high and c0CloseStyle is low and c0Body is above middle and c0BodyColour is black and "
              + "c1Body is below middle and c1BodyColour is white "
-             + "then pattern is bearish_engulfing";
-
+             + "then pattern is bearish_engulfing\n"
+             // Hammer
+             + "if trend is down and "
+             + "c0OpenStyle is below equal_low and c0CloseStyle is equal_low and c0Body is above middle and c0BodyColour is white "
+             + "then pattern is hammer";
+             */
+            //"if trend is down and c0LowerShadow is above middle and c0UpperShadow is below short and c0BodyColour is white then pattern is hammer";
             // Initialize fuzzy engine
             fuzzyRules = new FuzzyBlockOfRules(rulesString);
             fuzzyEngine.register(trend);
@@ -437,10 +474,14 @@ public class PrepareData {
             fuzzyEngine.register(c0BodyColour);
             fuzzyEngine.register(c0OpenStyle);
             fuzzyEngine.register(c0CloseStyle);
+            fuzzyEngine.register(c0UpperShadow);
+            fuzzyEngine.register(c0LowerShadow);
             fuzzyEngine.register(c1Body);
             fuzzyEngine.register(c1BodyColour);
             fuzzyEngine.register(c1OpenStyle);
             fuzzyEngine.register(c1CloseStyle);
+            fuzzyEngine.register(c1UpperShadow);
+            fuzzyEngine.register(c1LowerShadow);
             fuzzyEngine.register(pattern);
 
             fuzzyEngine.register(fuzzyRules);
@@ -452,41 +493,55 @@ public class PrepareData {
 
             //fuzzyEngine.reset();
             trend.setInputValue(((ema5.getValues()[j] > ema10.getValues()[j]) ? 1.5 : (ema5.getValues()[j] == ema10.getValues()[j]) ? 1.0 : 0.5));
-            c0Body.setInputValue(inputHigh[j] - inputLow[j]);
+            c0Body.setInputValue(Math.max(inputOpen[j], inputClose[j]) - Math.min(inputOpen[j], inputClose[j]));
             c0BodyColour.setInputValue((inputClose[j] > inputOpen[j]) ? COLOUR_WHITE : (inputClose[j] == inputOpen[j]) ? COLOUR_CROSS : COLOUR_BLACK);
             c0OpenStyle.setInputValue(inputOpen[j]);
             c0CloseStyle.setInputValue(inputClose[j]);
+            c0UpperShadow.setInputValue(inputHigh[j] - Math.max(inputOpen[j], inputClose[j]));
+            c0LowerShadow.setInputValue(Math.min(inputOpen[j], inputClose[j]) - inputLow[j]);
 
-            c1Body.setInputValue(inputHigh[j - 1] - inputLow[j - 1]);
+            c1Body.setInputValue(Math.max(inputOpen[j - 1], inputClose[j - 1]) - Math.min(inputOpen[j - 1], inputClose[j - 1]));
             c1BodyColour.setInputValue((inputClose[j - 1] > inputOpen[j - 1]) ? COLOUR_WHITE : (inputClose[j - 1] == inputOpen[j - 1]) ? COLOUR_CROSS : COLOUR_BLACK);
             c1OpenStyle.setInputValue(inputOpen[j - 1]);
             c1CloseStyle.setInputValue(inputClose[j - 1]);
+            c1UpperShadow.setInputValue(inputHigh[j - 1] - Math.max(inputOpen[j - 1], inputClose[j - 1]));
+            c1LowerShadow.setInputValue(Math.min(inputOpen[j - 1], inputClose[j - 1]) - inputLow[j - 1]);
 
             // Input values
-            System.out.println("ema5: " + ema5.getValues()[j]);
-            System.out.println("ema10: " + ema10.getValues()[j]);
-            System.out.println("trend: " + ((ema5.getValues()[j] > ema10.getValues()[j]) ? 1 : 0));
+            //System.out.println("ema5: " + ema5.getValues()[j]);
+            //System.out.println("ema10: " + ema10.getValues()[j]);
+            //System.out.println("trend: " + ((ema5.getValues()[j] > ema10.getValues()[j]) ? 1 : 0));
 
-            System.out.println("c0Body: " + c0Body.getInputValue());
-            System.out.println("c0BodyColour: " + c0BodyColour.getInputValue());
-            System.out.println("c0OpenStyle: " + c0OpenStyle.getInputValue());
-            System.out.println("c0CloseStyle: " + c0CloseStyle.getInputValue());
+            //System.out.println("c0Body: " + c0Body.getInputValue());
+            //System.out.println("c0BodyColour: " + c0BodyColour.getInputValue());
+            //System.out.println("c0OpenStyle: " + c0OpenStyle.getInputValue());
+            //System.out.println("c0CloseStyle: " + c0CloseStyle.getInputValue());
+            //System.out.println("c0UpperShadow: " + c0UpperShadow.getInputValue());
+            //System.out.println("c0LowerShadow: " + c0LowerShadow.getInputValue());
 
-            System.out.println("c1Body: " + c1Body.getInputValue());
-            System.out.println("c1BodyColour: " + c1BodyColour.getInputValue());
-            System.out.println("c1OpenStyle: " + c1OpenStyle.getInputValue());
-            System.out.println("c1CloseStyle: " + c1CloseStyle.getInputValue());
+            //System.out.println("c1Body: " + c1Body.getInputValue());
+            //System.out.println("c1BodyColour: " + c1BodyColour.getInputValue());
+            //System.out.println("c1OpenStyle: " + c1OpenStyle.getInputValue());
+            //System.out.println("c1CloseStyle: " + c1CloseStyle.getInputValue());
+            //System.out.println("c1UpperShadow: " + c1UpperShadow.getInputValue());
+            //System.out.println("c1LowerShadow: " + c1LowerShadow.getInputValue());
 
-            if (j == maxBegIdx + maxLength - 1) {
+
+            //if (j == maxBegIdx + maxLength - 1) {
+            if (inputDate[j].toString().contains("Feb 04 00:00:00 EST 2013a")) {
                 c0Body.chart(true);
                 c0BodyColour.chart(true);
                 c0OpenStyle.chart(true);
                 c0CloseStyle.chart(true);
+                c0UpperShadow.chart(true);
+                c0LowerShadow.chart(true);
+
                 c1Body.chart(true);
                 c1BodyColour.chart(true);
                 c1OpenStyle.chart(true);
                 c1CloseStyle.chart(true);
-
+                c1UpperShadow.chart(true);
+                c1LowerShadow.chart(true);
             }
 
             try {
@@ -504,8 +559,10 @@ public class PrepareData {
 
             if (patternValue > 0.0D) {
                 patternCount++;
-                System.out.println("[inputDate: " + inputDate[j] + "]: PATTERN DETECTION = " + patternValue);
+                System.out.println("Date: " + inputDate[j] + " - Pattern detected: " + Candlestick.getName((int) Math.round(patternValue)));
+                patternIdList.add((int) Math.round(patternValue));
             }
+
         }
 
         if (patternCount > 0) {
@@ -513,6 +570,7 @@ public class PrepareData {
         } else {
             System.out.println("No patterns detected.");
         }
+
 
         //int globalSize = minEndIdx - maxBegIdx + 1;
         for (StockIndicator stockIndicator : stockIndicatorList) {
