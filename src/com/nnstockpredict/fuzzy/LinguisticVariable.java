@@ -13,12 +13,12 @@
 //Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 package com.nnstockpredict.fuzzy;
 
-import com.nnstockpredict.fuzzy.plot.PlotWindow;
+import com.nnstockpredict.fuzzy.plot.DialogGraph;
 import java.awt.Color;
 import java.util.*;
-import net.sourceforge.jFuzzyLogic.plot.DialogGraph;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.xy.XYSeries;
@@ -317,8 +317,9 @@ public class LinguisticVariable {
     public JFreeChart chart(boolean showIt) {
         boolean discrete = true;
         boolean plotDefuzz = false;
-
-        int numberOfPoints = PlotWindow.DEFAULT_CHART_NUMBER_OF_POINTS;
+        
+        double value = this.getInputValue();
+        int numberOfPoints = 1024;
 
         // Get global universe max and min
         MembershipFunction MF[] = this.getMembershipFunctions();
@@ -326,13 +327,14 @@ public class LinguisticVariable {
         double universeMax = -9999.0D;
 
         for (int i = 0; i < MF.length; i++) {
-            System.out.println("i = " + i);
-            System.out.println("MF.length = " + MF.length);
-            System.out.println("MF[i] = " + MF[i]);
             double[] range = MF[i].getRange();
 
             universeMin = Math.min(range[0], universeMin);
             universeMax = Math.max(range[3], universeMax);
+                                    
+            // Size to fit the value
+            universeMin = Math.min(value-0.25D, universeMin);
+            universeMax = Math.max(value+0.25D, universeMax);
         }
 
         double step = (universeMax - universeMin) / (numberOfPoints);
@@ -340,7 +342,7 @@ public class LinguisticVariable {
         // Create a data set
         XYSeriesCollection xyDataset = new XYSeriesCollection();
 
-        double value = this.getInputValue();
+        
         //---
         // Current value
         //---
@@ -352,7 +354,13 @@ public class LinguisticVariable {
             seriesValue.add(value + step, 1);
             seriesValue.add(value + 2 * step, 0);
             xyDataset.addSeries(seriesValue);
+        } else {
+            System.out.println("value is NaN for " + this.getLVName());
         }
+        
+        System.out.println("value for " + this.getLVName() + " is:" + value);
+        System.out.println("universeMin:" + universeMin);
+        System.out.println("universeMax:" + universeMax);
 
         //---
         // Plot deffuzyfier values (if any)
@@ -380,7 +388,7 @@ public class LinguisticVariable {
             // Create a series and add points
             XYSeries series = new XYSeries(MF[j].getName());
             // Continuous case: Add every membershipfunction's point
-            numberOfPoints = PlotWindow.DEFAULT_CHART_NUMBER_OF_POINTS;
+            numberOfPoints = 1024;
             double xx = universeMin;
             for (int i = 0; i < numberOfPoints; i++, xx += step) {
                 series.add(xx, MF[j].fuzzify(xx));
@@ -389,19 +397,24 @@ public class LinguisticVariable {
             // Add serie to dataSet
             xyDataset.addSeries(series);
         }
+                
 
         // Create chart and show it
         JFreeChart chart;
         chart = ChartFactory.createXYAreaChart(this.getLVName(), "x", "Membership", xyDataset, PlotOrientation.VERTICAL, true, true, false);
 
 
-        // Set 'Value' color to BLACK
+        // Set 'Value' color to BLACK                
         XYPlot plot = chart.getXYPlot();
         plot.getRenderer().setSeriesPaint(0, Color.BLACK);
         // Set 'deffuzifier' color to GREY
         if (plotDefuzz) {
             plot.getRenderer().setSeriesPaint(1, Color.gray);
         }
+        
+        // Set domain range
+        ValueAxis x_range = plot.getDomainAxis(); 
+        x_range.setRange(universeMin, universeMax);       
 
         // Show chart
         if (showIt) {

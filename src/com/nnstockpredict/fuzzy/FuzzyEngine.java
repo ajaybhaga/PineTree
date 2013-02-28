@@ -785,6 +785,7 @@ public FuzzyEngine()
 	addHedge(new HedgeVery());
 	addHedge(new HedgeSomewhat());
         addHedge(new HedgeAbove());
+        addHedge(new HedgeBelow());
 
 	//Create labels weights hash
 	labelWeightsHash = new Hashtable();

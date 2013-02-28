@@ -3,9 +3,7 @@ package com.nnstockpredict.fuzzy.plot;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
-
 import javax.swing.JPanel;
-
 import org.jfree.chart.JFreeChart;
 
 /**
