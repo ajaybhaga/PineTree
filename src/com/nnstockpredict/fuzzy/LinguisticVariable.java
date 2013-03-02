@@ -101,7 +101,7 @@ public class LinguisticVariable {
     }
 
     /**
-     * Defuzzify using centroid. Memebership functions are scaled by product and
+     * Defuzzify using centroid. Membership functions are scaled by product and
      * combined by summation. This method has to be completely redone
      * (eliminated operations on discrete array, support different modes of
      * scaling and summation).
@@ -205,6 +205,37 @@ public class LinguisticVariable {
         }
 
         return array;
+    }
+    
+    
+    
+    /**
+     * Perform fuzzification for an input value using the max membership 
+     * function.
+     *
+     * @return Object Returns Object with name of membership function and 
+     * result of fuzzification.
+     */
+    public Object[] fuzzifyFromMaxMembershipFunction() {
+
+        Iterator it = storage.keySet().iterator();
+        String maxMembershipFuncName = "";
+        double maxMembership = 0.0D;
+        
+        while (it.hasNext()) {
+            String name = (String) it.next();
+            MembershipFunction mf = (MembershipFunction) storage.get(name);
+            if (mf.fuzzify(input_value) > maxMembership) {
+            maxMembership = Math.max(mf.fuzzify(input_value), maxMembership);
+            maxMembershipFuncName = mf.getName();
+            }
+        }
+        
+        Object objArray[] = new Object[2];
+        objArray[0] = maxMembershipFuncName;
+        objArray[1] = maxMembership;
+
+        return objArray;
     }
 
     /**

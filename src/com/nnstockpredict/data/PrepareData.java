@@ -1,7 +1,9 @@
 package com.nnstockpredict.data;
 
+import com.nnstockpredict.Utility.CandlestickUtility;
 import com.nnstockpredict.Utility.ArrayUtil;
 import com.nnstockpredict.Utility.FileUtils;
+import com.nnstockpredict.data.candlestick.CandlestickPattern;
 import com.nnstockpredict.data.indicator.*;
 import com.nnstockpredict.fuzzy.*;
 import java.util.*;
@@ -270,6 +272,9 @@ public class PrepareData {
         ChartData chartData = new ChartData(ticker.getSymbol(), inputDate, inputOpen, inputHigh, inputLow, inputClose, maxBegIdx, maxLength, macd, macdPeakScore, macdZeroScore);
         FileUtils.writeChartData(chartData);
 
+        // Load candlestick patterns
+        CandlestickUtility.loadPatterns();
+
         double low = 0;
         double equal_low = 0;
         double equal = 0;
@@ -278,6 +283,101 @@ public class PrepareData {
 
         List<Integer> patternIdList = new LinkedList<Integer>();
         int patternCount = 0;
+
+        // Calculate variation of percentage max and min
+        double maxD = -9999.0D;
+        double minD = 9999.0D;
+        int varLookBack = 120; // Look back n days
+        for (int j = (maxBegIdx + maxLength) - varLookBack; j < maxBegIdx + maxLength; j++) {
+            if (j + 1 < maxBegIdx + maxLength) {
+
+                // Calculate variation of percentage
+                double varPct = ((inputClose[j + 1] - inputClose[j]) / inputClose[j]) * 100.0D;
+
+                //System.out.println("varPct: " + varPct + ", inputClose[j]=" + inputClose[j] + ", inputClose[j+1]=" + inputClose[j+1]);
+                minD = Math.min(varPct, minD);
+                maxD = Math.max(varPct, maxD);
+            }
+        }
+
+        // Calculate U max and min
+        double minU = Math.floor(minD);
+        double maxU = Math.ceil(maxD);
+
+        double limitU = Math.max(Math.abs(minU), Math.abs(maxU));
+        maxU = Math.abs(limitU);
+        minU = -Math.abs(limitU);
+
+        double stepU = (maxU - minU) / 4.0D;
+        minU = minU - (stepU / 2.0D);
+
+        LinguisticVariable variation = null;
+
+        variation = new LinguisticVariable("variation");
+
+        System.out.println("minU: " + minU);
+        System.out.println("maxU: " + maxU);
+        System.out.println("stepU: " + stepU);
+
+        int currU = 0;
+        variation.add("extremeDecrease", minU + (stepU * currU), minU + ((stepU / 2.0D) * (currU + 1)), minU + ((stepU / 2.0D) * (currU + 1)), minU + (stepU * (currU + 1)));
+        System.out.println("extremeDecrease=[" + (minU + (stepU * currU)) + "," + (minU + ((stepU / 2.0D) * (currU + 1))) + "," + (minU + ((stepU / 2.0D) * (currU + 1))) + "," + (minU + (stepU * (currU + 1))) + "].");
+        currU++;
+
+        while (currU < 9) {
+            String membershipName = "";
+
+            switch (currU) {
+                case 1:
+                    membershipName = "largeDecrease";
+                    break;
+                case 2:
+                    membershipName = "normalDecrease";
+                    break;
+                case 3:
+                    membershipName = "smallDecrease";
+                    break;
+                case 4:
+                    membershipName = "noChange";
+                    break;
+                case 5:
+                    membershipName = "smallIncrease";
+                    break;
+                case 6:
+                    membershipName = "normalIncrease";
+                    break;
+                case 7:
+                    membershipName = "largeIncrease";
+                    break;
+                case 8:
+                    membershipName = "extremeIncrease";
+                    break;
+            }
+
+            variation.add(membershipName, minU + ((stepU / 2.0D) * currU), minU + ((stepU / 2.0D) * (currU + 1)), minU + ((stepU / 2.0D) * (currU + 1)), minU + ((stepU / 2.0D) * (currU + 2)));
+            System.out.println(membershipName + "=[" + (minU + ((stepU / 2.0D) * currU)) + "," + (minU + ((stepU / 2.0D) * (currU + 1))) + "," + (minU + ((stepU / 2.0D) * (currU + 1))) + "," + (minU + ((stepU / 2.0D) * (currU + 2))) + "].");
+            currU++;
+        }
+
+        double thirtyDayMin = 9999.0D;
+        double thirtyDayMax = -9999.0D;
+        // Determine the 30 day fluctuation price
+        for (int j = (maxBegIdx + maxLength) - 30; j < maxBegIdx + maxLength; j++) {
+            thirtyDayMin = Math.min(inputClose[j], thirtyDayMin);
+            thirtyDayMax = Math.max(inputClose[j], thirtyDayMax);
+        }
+
+        double thirtyDayFluctTotal = thirtyDayMax - thirtyDayMin;
+
+        System.out.println("thirtyDayMax: " + thirtyDayMax);
+        System.out.println("thirtyDayMin: " + thirtyDayMin);
+
+        double short_start = (0.5 / 100.0) * thirtyDayFluctTotal;
+        double short_end = (1.5 / 100.0) * thirtyDayFluctTotal;
+        double middle_start = (2.5 / 100.0) * thirtyDayFluctTotal;
+        double middle_end = (3.5 / 100.0) * thirtyDayFluctTotal;
+        double long_start = (5.0 / 100.0) * thirtyDayFluctTotal;
+        double long_end = (25.0 / 100.0) * thirtyDayFluctTotal;
 
         for (int j = maxBegIdx; j < maxBegIdx + maxLength; j++) {
 
@@ -307,25 +407,16 @@ public class PrepareData {
             String patternName;
             int patternId;
             pattern = new LinguisticVariable("pattern");
-            patternName = Candlestick.PATTERN_NAME_HAMMER;
-            patternId = Candlestick.HAMMER;
-            pattern.add(patternName, patternId - 1.0D, patternId, patternId, patternId + 1.0D);
 
-            patternName = Candlestick.PATTERN_NAME_BULLISH_SEPARATING_LINES;
-            patternId = Candlestick.BULLISH_SEPARATING_LINES;
-            pattern.add(patternName, patternId - 1.0D, patternId, patternId, patternId + 1.0D);
+            Iterator it = CandlestickUtility.getMap().keySet().iterator();
+            while (it.hasNext()) {
+                int id = (Integer) it.next();
+                CandlestickPattern candlestickPattern = (CandlestickPattern) CandlestickUtility.getMap().get(id);
 
-            patternName = Candlestick.PATTERN_NAME_SHOOTING_STAR;
-            patternId = Candlestick.SHOOTING_STAR;
-            pattern.add(patternName, patternId - 1.0D, patternId, patternId, patternId + 1.0D);
-
-            patternName = Candlestick.PATTERN_NAME_BEARISH_ENGULFING;
-            patternId = Candlestick.BEARISH_ENGULFING;
-            pattern.add(patternName, patternId - 1.0D, patternId, patternId, patternId + 1.0D);
-
-            patternName = Candlestick.PATTERN_NAME_BULLISH_ENGULFING;
-            patternId = Candlestick.BULLISH_ENGULFING;
-            pattern.add(patternName, patternId - 1.0D, patternId, patternId, patternId + 1.0D);
+                patternName = candlestickPattern.getName();
+                patternId = candlestickPattern.getId();
+                pattern.add(patternName, patternId - 2.0D, patternId, patternId, patternId + 2.0D);
+            }
 
             c0BodyColour = new LinguisticVariable("c0BodyColour");
             c0BodyColour.add("black", 0.0D, 0.5D, 0.5D, 1.0D);
@@ -336,17 +427,6 @@ public class PrepareData {
             c1BodyColour.add("black", 0.0D, 0.5D, 0.5D, 1.0D);
             c1BodyColour.add("cross", 0.5D, 1.0D, 1.0D, 1.5D);
             c1BodyColour.add("white", 1.0D, 1.5D, 1.5D, 2.0D);
-
-
-            double thirtyDayFluctTotal = ema30.getMaxValue() - ema30.getMinValue();
-
-            double f = 0.5; // Body sizing factor (higher value for higher beta)
-            double short_start = ((0.5 * f) / 100.0) * thirtyDayFluctTotal;
-            double short_end = ((1.5 * f) / 100.0) * thirtyDayFluctTotal;
-            double middle_start = ((2.5 * f) / 100.0) * thirtyDayFluctTotal;
-            double middle_end = ((3.5 * f) / 100.0) * thirtyDayFluctTotal;
-            double long_start = ((5.0 * f) / 100.0) * thirtyDayFluctTotal;
-            double long_end = ((14.0 * f) / 100.0) * thirtyDayFluctTotal;
 
             c0Body = new LinguisticVariable("c0Body");
             c0Body.add("equal", 0.0D, (short_start / 2.0D), (short_start / 2.0D), short_start);
@@ -371,6 +451,8 @@ public class PrepareData {
             //System.out.println("middle_end_value: " + middle_end);
             //System.out.println("long_start_value:" + long_start);
             //System.out.println("long_end_value:" + long_end);
+
+
 
 
             // Retrieve open/close style for previous day
@@ -443,32 +525,12 @@ public class PrepareData {
             c1LowerShadow.add("middle", short_end, middle_start, middle_end, long_start);
             c1LowerShadow.add("long", middle_end, long_start, long_end, long_end);
 
-            /*            String rulesString =
-             "if trend is up and "
-             + "c0OpenStyle is high and c0CloseStyle is low and c0Body is above middle and c0BodyColour is black and "
-             + "c1OpenStyle is above equal_low and c1CloseStyle is high and c1Body is above short and c1BodyColour is white "
-             + "then pattern is bearish_engulfing";
-             */
+            // Retrieve fuzzy rules
+            String rulesString = CandlestickUtility.getAllRules();
 
-            String rulesString =
-                    Candlestick.RULE_HAMMER + "\n"
-                    + Candlestick.RULE_BULLISH_SEPARATING_LINES + "\n"
-                    + Candlestick.RULE_SHOOTING_STAR + "\n"
-                    + Candlestick.RULE_BEARISH_ENGULFING + "\n"
-                    + Candlestick.RULE_BULLISH_ENGULFING;
-            /*                    // Bearish engulfing
-             "if trend is up and "
-             + "c0OpenStyle is high and c0CloseStyle is low and c0Body is above middle and c0BodyColour is black and "
-             + "c1Body is below middle and c1BodyColour is white "
-             + "then pattern is bearish_engulfing\n"
-             // Hammer
-             + "if trend is down and "
-             + "c0OpenStyle is below equal_low and c0CloseStyle is equal_low and c0Body is above middle and c0BodyColour is white "
-             + "then pattern is hammer";
-             */
-            //"if trend is down and c0LowerShadow is above middle and c0UpperShadow is below short and c0BodyColour is white then pattern is hammer";
             // Initialize fuzzy engine
             fuzzyRules = new FuzzyBlockOfRules(rulesString);
+            fuzzyEngine.register(variation);
             fuzzyEngine.register(trend);
             fuzzyEngine.register(c0Body);
             fuzzyEngine.register(c0BodyColour);
@@ -492,6 +554,15 @@ public class PrepareData {
             }
 
             //fuzzyEngine.reset();
+
+
+            if (j + 1 < maxBegIdx + maxLength) {
+                // Calculate variation of percentage
+                double varPct = ((inputClose[j + 1] - inputClose[j]) / inputClose[j]) * 100.0D;
+                //System.out.println("variation percentage = " + varPct + "%");
+                variation.setInputValue(varPct);
+            }
+
             trend.setInputValue(((ema5.getValues()[j] > ema10.getValues()[j]) ? 1.5 : (ema5.getValues()[j] == ema10.getValues()[j]) ? 1.0 : 0.5));
             c0Body.setInputValue(Math.max(inputOpen[j], inputClose[j]) - Math.min(inputOpen[j], inputClose[j]));
             c0BodyColour.setInputValue((inputClose[j] > inputOpen[j]) ? COLOUR_WHITE : (inputClose[j] == inputOpen[j]) ? COLOUR_CROSS : COLOUR_BLACK);
@@ -528,7 +599,7 @@ public class PrepareData {
 
 
             //if (j == maxBegIdx + maxLength - 1) {
-            if (inputDate[j].toString().contains("Feb 04 00:00:00 EST 2013a")) {
+            if (inputDate[j].toString().contains("Wed Oct 05 00:00:00 EDT 2011")) {
                 c0Body.chart(true);
                 c0BodyColour.chart(true);
                 c0OpenStyle.chart(true);
@@ -542,7 +613,57 @@ public class PrepareData {
                 c1CloseStyle.chart(true);
                 c1UpperShadow.chart(true);
                 c1LowerShadow.chart(true);
+
+                variation.chart(true);
+
+                Object[] objArray;
+                String name;
+                double value;
+
+                objArray = variation.fuzzifyFromMaxMembershipFunction();
+                name = (String) objArray[0];
+                value = (Double) objArray[1];
+
+                System.out.println("variation max membership name: " + name);
+                System.out.println("variation max membership value: " + value);
+
+                objArray = c0Body.fuzzifyFromMaxMembershipFunction();
+                name = (String) objArray[0];
+                value = (Double) objArray[1];
+                System.out.println("c0Body = " + name + " [" + value + "]");
+
+                objArray = c0BodyColour.fuzzifyFromMaxMembershipFunction();
+                name = (String) objArray[0];
+                value = (Double) objArray[1];
+                System.out.println("c0BodyColour = " + name + " [" + value + "]");
+
+
+                objArray = c0OpenStyle.fuzzifyFromMaxMembershipFunction();
+                name = (String) objArray[0];
+                value = (Double) objArray[1];
+                System.out.println("c0OpenStyle = " + name + " [" + value + "]");
+
+
+                objArray = c0CloseStyle.fuzzifyFromMaxMembershipFunction();
+                name = (String) objArray[0];
+                value = (Double) objArray[1];
+                System.out.println("c0CloseStyle = " + name + " [" + value + "]");
+
+
+                objArray = c0UpperShadow.fuzzifyFromMaxMembershipFunction();
+                name = (String) objArray[0];
+                value = (Double) objArray[1];
+                System.out.println("c0UpperShadow = " + name + " [" + value + "]");
+
+
+                objArray = c0LowerShadow.fuzzifyFromMaxMembershipFunction();
+                name = (String) objArray[0];
+                value = (Double) objArray[1];
+                System.out.println("c0LowerShadow = " + name + " [" + value + "]");
+
             }
+
+
 
             try {
                 fuzzyRules.evaluateBlock();
@@ -559,7 +680,7 @@ public class PrepareData {
 
             if (patternValue > 0.0D) {
                 patternCount++;
-                System.out.println("Date: " + inputDate[j] + " - Pattern detected: " + Candlestick.getName((int) Math.round(patternValue)));
+                System.out.println("Date: " + inputDate[j] + " - Pattern detected: " + CandlestickUtility.getName((int) Math.round(patternValue)) + " [" + patternValue + "].");
                 patternIdList.add((int) Math.round(patternValue));
             }
 
