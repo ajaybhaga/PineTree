@@ -60,25 +60,35 @@ public class MarketEvaluate {
             double predict = predictData.getData(0);
             double diff = Math.abs(predict - actual);
 
-            Direction actualDirection = determineDirection(actual);
-            Direction predictDirection = determineDirection(predict);
+          //  Direction actualDirection = determineDirection(actual);
+          //  Direction predictDirection = determineDirection(predict);
 
-            if (actualDirection == predictDirection) {
+          //  if (actualDirection == predictDirection) {
+          //      correct++;
+          //  }     
+            
+            // forecast[i+1] = close[i] + close[i](c/100);
+            
+            
+            double threshold = 0.05D;
+           // if (diff < threshold) {
+            if ((actual >= 0) == (predict >= 0)) {
                 correct++;
             }
 
             count++;
+            
+            String inputStr = String.format("[%.2f, %.2f, %.2f, %.2f, %.2f, %.2f]", input.getData()[0], input.getData()[1], input.getData()[2], input.getData()[3], input.getData()[4], input.getData()[5]);
 
-            System.out.println("Day " + count + ":actual="
-                    + format.format(actual) + "(" + actualDirection + ")"
-                    + ",predict=" + format.format(predict) + "("
-                    + predictDirection + ")" + ",diff=" + diff);
+            System.out.println("Day " + count + ": inputStr=" + inputStr + ", actual="
+                    + format.format(actual)
+                    + ", predict=" + format.format(predict) + ", diff=" + diff);
         }
 
         System.out.println("Test Set Summary:");
         double percent = (double) correct / (double) count;
-        System.out.println("Direction correct:" + correct + "/" + count);
-        System.out.println("Directional Accuracy:"
+        System.out.println("Correct predictions:" + correct + "/" + count);
+        System.out.println("Prediction Accuracy:"
                 + format.format(percent * 100) + "%");
 
     }
@@ -110,6 +120,7 @@ public class MarketEvaluate {
         test(trainingSet, network);
         // Test the evaluation set
         test(evaluationSet, network);
+        
         
         // Test and predict for tomorrow
         /*

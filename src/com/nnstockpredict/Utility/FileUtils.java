@@ -167,8 +167,8 @@ public class FileUtils {
         SimpleDateFormat format = new SimpleDateFormat(pattern);
 
         try {
-            
-            output.write("name = '" + chartData.getName() + "';\n");          
+
+            output.write("name = '" + chartData.getName() + "';\n");
 
             output.write("ohlc = [");
             for (int i = chartData.getMaxBegIdx(); i < chartData.getInputClose().length; i++) {
@@ -182,9 +182,45 @@ public class FileUtils {
             }
             output.write("];\n");
 
+            output.write("close = [");
+            for (int i = chartData.getMaxBegIdx(); i < chartData.getInputClose().length; i++) {
+                String dateStr = format.format(chartData.getInputDate()[i]);
+
+                output.write("['" + dateStr + "'," + chartData.getInputClose()[i] + "]");
+
+                if (i != chartData.getInputClose().length - 1) {
+                    output.write(",");
+                }
+            }
+            output.write("];\n");
+
+            output.write("forecast = [");
+            for (int i = 0; i < chartData.getForecast().length; i++) {
+                String dateStr = format.format(chartData.getInputDate()[chartData.getMaxBegIdx() + i]);
+
+                output.write("['" + dateStr + "'," + chartData.getForecast()[i] + "]");
+
+                if (i != chartData.getForecast().length - 1) {
+                    output.write(",");
+                }
+            }
+            output.write("];\n");
+
+            output.write("forecastError = [");
+            for (int i = 0; i < chartData.getForecastError().length; i++) {
+                String dateStr = format.format(chartData.getInputDate()[chartData.getMaxBegIdx() + i]);
+
+                output.write("['" + dateStr + "'," + chartData.getForecastError()[i] + "]");
+
+                if (i != chartData.getForecastError().length - 1) {
+                    output.write(",");
+                }
+            }
+            output.write("];\n");
+
             output.write("macd = [");
             for (int i = 0; i < chartData.getMACD().getLength(); i++) {
-                String dateStr = format.format(chartData.getInputDate()[chartData.getMaxBegIdx()+i]);
+                String dateStr = format.format(chartData.getInputDate()[chartData.getMaxBegIdx() + i]);
 
                 output.write("['" + dateStr + "'," + chartData.getMACD().getValues()[i] + "]");
 
@@ -193,10 +229,10 @@ public class FileUtils {
                 }
             }
             output.write("];\n");
-            
+
             output.write("macdZeroScore = [");
             for (int i = 0; i < chartData.getMACDZeroScore().getLength(); i++) {
-                String dateStr = format.format(chartData.getInputDate()[chartData.getMaxBegIdx()+i]);
+                String dateStr = format.format(chartData.getInputDate()[chartData.getMaxBegIdx() + i]);
 
                 output.write("['" + dateStr + "'," + chartData.getMACDZeroScore().getValues()[i] + "]");
 
@@ -205,10 +241,10 @@ public class FileUtils {
                 }
             }
             output.write("];\n");
-                 
+
             output.write("macdPeakScore = [");
             for (int i = 0; i < chartData.getMACDPeakScore().getLength(); i++) {
-                String dateStr = format.format(chartData.getInputDate()[chartData.getMaxBegIdx()+i]);
+                String dateStr = format.format(chartData.getInputDate()[chartData.getMaxBegIdx() + i]);
 
                 output.write("['" + dateStr + "'," + chartData.getMACDPeakScore().getValues()[i] + "]");
 

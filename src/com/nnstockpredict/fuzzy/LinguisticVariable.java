@@ -206,34 +206,43 @@ public class LinguisticVariable {
 
         return array;
     }
-    
-    
-    
+
     /**
-     * Perform fuzzification for an input value using the max membership 
+     * Retrieve translated value of the fuzzified value with max membership
      * function.
      *
-     * @return Object Returns Object with name of membership function and 
-     * result of fuzzification.
+     * @return Object Returns Object with name of membership function and result
+     * of fuzzification.
      */
-    public Object[] fuzzifyFromMaxMembershipFunction() {
+    public Object[] translateFromMaxMF() {
 
         Iterator it = storage.keySet().iterator();
         String maxMembershipFuncName = "";
-        double maxMembership = 0.0D;
-        
+        double maxMembership = -9999.0D;
+        double x = -9999.0D;
+
         while (it.hasNext()) {
             String name = (String) it.next();
             MembershipFunction mf = (MembershipFunction) storage.get(name);
             if (mf.fuzzify(input_value) > maxMembership) {
-            maxMembership = Math.max(mf.fuzzify(input_value), maxMembership);
-            maxMembershipFuncName = mf.getName();
+                maxMembership = Math.max(mf.fuzzify(input_value), maxMembership);
+                maxMembershipFuncName = mf.getName();
+                x = mf.getMaxRangeValue();
+
+                //System.out.println("Translated Value: " + x + ", MF Name: " + maxMembershipFuncName);
+
             }
         }
         
+        // This should never happen
+        if (x == -9999.0D) {
+            System.err.print("SEVERE ERROR - bad translation.");
+            System.exit(1);
+        }
+
         Object objArray[] = new Object[2];
         objArray[0] = maxMembershipFuncName;
-        objArray[1] = maxMembership;
+        objArray[1] = x;
 
         return objArray;
     }
@@ -347,7 +356,7 @@ public class LinguisticVariable {
     public JFreeChart chart(boolean showIt) {
         boolean discrete = true;
         boolean plotDefuzz = false;
-        
+
         double value = this.getInputValue();
         int numberOfPoints = 1024;
 
@@ -361,10 +370,10 @@ public class LinguisticVariable {
 
             universeMin = Math.min(range[0], universeMin);
             universeMax = Math.max(range[3], universeMax);
-                                    
+
             // Size to fit the value
-            universeMin = Math.min(value-0.25D, universeMin);
-            universeMax = Math.max(value+0.25D, universeMax);
+            universeMin = Math.min(value - 0.25D, universeMin);
+            universeMax = Math.max(value + 0.25D, universeMax);
         }
 
         double step = (universeMax - universeMin) / (numberOfPoints);
@@ -372,7 +381,7 @@ public class LinguisticVariable {
         // Create a data set
         XYSeriesCollection xyDataset = new XYSeriesCollection();
 
-        
+
         //---
         // Current value
         //---
@@ -387,7 +396,7 @@ public class LinguisticVariable {
         } else {
             System.out.println("value is NaN for " + this.getLVName());
         }
-        
+
         //---
         // Plot deffuzyfier values (if any)
         //---
@@ -423,24 +432,24 @@ public class LinguisticVariable {
             // Add serie to dataSet
             xyDataset.addSeries(series);
         }
-                
+
 
         // Create chart and show it
         JFreeChart chart;
         chart = ChartFactory.createXYAreaChart(this.getLVName(), "x", "Membership", xyDataset, PlotOrientation.VERTICAL, true, true, false);
 
 
-        // Set 'Value' color to BLACK                
+        // Set 'Value' color to BLACK
         XYPlot plot = chart.getXYPlot();
         plot.getRenderer().setSeriesPaint(0, Color.BLACK);
         // Set 'deffuzifier' color to GREY
         if (plotDefuzz) {
             plot.getRenderer().setSeriesPaint(1, Color.gray);
         }
-        
+
         // Set domain range
-        ValueAxis x_range = plot.getDomainAxis(); 
-        x_range.setRange(universeMin, universeMax);       
+        ValueAxis x_range = plot.getDomainAxis();
+        x_range.setRange(universeMin, universeMax);
 
         // Show chart
         if (showIt) {

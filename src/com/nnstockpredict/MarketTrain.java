@@ -93,7 +93,7 @@ public class MarketTrain {
                 lastError = trainFolded.getError();
             } while (trainFolded.getError() > error);
         }
-    }
+    }        
 
     public static void train(File dataDir) {
 
@@ -117,7 +117,7 @@ public class MarketTrain {
         final MLDataSet trainingSet = EncogUtility.loadEGB2Memory(trainingFile);
 
         // Train the network
-        trainNetwork(network, trainingSet, 0.01, false);
+        trainNetwork(network, trainingSet, 0.022, false);
 
         System.out.println("Final Error: " + network.calculateError(trainingSet));
         System.out.println("Training complete, saving network.");

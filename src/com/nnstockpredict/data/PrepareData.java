@@ -1,11 +1,15 @@
 package com.nnstockpredict.data;
 
+import com.nnstockpredict.Config;
+import com.nnstockpredict.MarketEvaluate;
+import com.nnstockpredict.MarketTrain;
 import com.nnstockpredict.Utility.CandlestickUtility;
-import com.nnstockpredict.Utility.ArrayUtil;
 import com.nnstockpredict.Utility.FileUtils;
 import com.nnstockpredict.data.candlestick.CandlestickPattern;
 import com.nnstockpredict.data.indicator.*;
 import com.nnstockpredict.fuzzy.*;
+import java.io.File;
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -13,12 +17,20 @@ import org.encog.ml.data.MLData;
 import org.encog.ml.data.MLDataPair;
 import org.encog.ml.data.MLDataSet;
 import org.encog.ml.data.basic.BasicMLData;
-import org.encog.ml.data.basic.BasicMLDataPair;
 import org.encog.ml.data.basic.BasicMLDataSet;
+import org.encog.ml.data.folded.FoldedDataSet;
 import org.encog.ml.data.market.MarketDataType;
 import org.encog.ml.data.market.TickerSymbol;
 import org.encog.ml.data.market.loader.LoadedMarketData;
 import org.encog.ml.data.market.loader.MarketLoader;
+import org.encog.ml.train.MLTrain;
+import org.encog.neural.networks.BasicNetwork;
+import org.encog.neural.networks.training.Train;
+import org.encog.neural.networks.training.cross.CrossValidationKFold;
+import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
+import org.encog.persist.EncogDirectoryPersistence;
+import org.encog.util.arrayutil.NormalizeArray;
+import org.encog.util.simple.EncogUtility;
 
 public class PrepareData {
 
@@ -33,11 +45,14 @@ public class PrepareData {
      * The loader to use to obtain the data.
      */
     private final MarketLoader loader;
+    private File dataDir;
     private MLDataSet trainingSet = null;
     private MLDataSet evaluationSet = null;
+    private LinguisticVariable variation = null;
 
-    public PrepareData(MarketLoader loader) {
+    public PrepareData(MarketLoader loader, File dataDir) {
         this.loader = loader;
+        this.dataDir = dataDir;
     }
 
     public MLDataSet getTrainingSet() {
@@ -46,6 +61,90 @@ public class PrepareData {
 
     public MLDataSet getEvaluationSet() {
         return evaluationSet;
+    }
+
+    public void trainNetwork(BasicNetwork network, MLDataSet training, boolean crossValidation) {
+
+        int epoch = 1;
+        double lastError = 0.0;
+
+        String crossValidationStr = (crossValidation) ? "on" : "off";
+
+        System.out.println("Cross Validation is " + crossValidationStr + ".");
+
+
+        double initialError = -9999.0D;
+        double error = 0.0D;
+
+        if (!crossValidation) {
+
+            final Train train = new ResilientPropagation(network, training);
+
+            do {
+                train.iteration();
+/*
+                if (initialError == -9999.0D) {
+                    initialError = train.getError();
+
+                    if (initialError < 0.03D) {
+                        error = initialError - 0.02D;
+                    } else {
+                        error = 0.03D;
+                    }
+                }*/
+                error = 0.01D;
+
+                System.out.println("TRAINING - Epoch #" + epoch + " Error:" + train.getError());
+                epoch++;
+
+                if (Math.abs(lastError - train.getError()) < 0.000000000001) {
+                    System.out.println("Error difference too low (" + Math.abs(lastError - train.getError()) + ") ending training at Epoch #" + epoch + " Error:" + train.getError());
+                    break;                    
+                }
+                
+                if (epoch > 50000) {
+                    break;
+                }
+
+                // Store the error
+                lastError = train.getError();
+            } while (train.getError() > error);
+            //} while (train.getIteration() < 10000);
+
+        } else {
+
+            final FoldedDataSet folded = new FoldedDataSet(training);
+            final MLTrain train = new ResilientPropagation(network, folded);
+            final CrossValidationKFold trainFolded = new CrossValidationKFold(train, 4);
+
+            do {
+                //train.iteration();
+                trainFolded.iteration();
+/*
+                if (initialError == -9999.0D) {
+                    initialError = train.getError();
+
+                    if (initialError < 0.05D) {
+                        error = initialError - 0.02D;
+                    } else {
+                        error = 0.05D;
+                    }
+                }*/
+                error = 0.01D;
+
+                //  System.out.println("TRAINING - Epoch #" + epoch + " Error:" + train.getError());
+                System.out.println("TRAINING - Epoch #" + epoch + " Error:" + trainFolded.getError());
+                epoch++;
+
+                if (Math.abs(lastError - trainFolded.getError()) < 0.000000000001) {
+                    System.out.println("Error difference too low (" + Math.abs(lastError - trainFolded.getError()) + ") ending training at Epoch #" + epoch + " Error:" + trainFolded.getError());
+                    break;
+                }
+
+                // Store the error
+                lastError = trainFolded.getError();
+            } while (trainFolded.getError() > error);
+        }
     }
 
     /**
@@ -75,6 +174,7 @@ public class PrepareData {
         double[] inputOpen = new double[data.size()];
         double[] inputClose = new double[data.size()];
         double[] direction = new double[data.size()];
+
         Date[] inputDate = new Date[data.size()];
 
         int i = 0;
@@ -125,7 +225,7 @@ public class PrepareData {
         closePrice.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
         stockIndicatorList.add(closePrice);
 
-        RSI rsi = new RSI("RSI", inputClose.length);
+      /*  RSI rsi = new RSI("RSI", inputClose.length);
         //rsi.setUseAsInput(true);
         rsi.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
         stockIndicatorList.add(rsi);
@@ -138,13 +238,13 @@ public class PrepareData {
         StochF stochF = new StochF("Stoch %K", inputClose.length);
         stochF.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
         stockIndicatorList.add(stochF);
-
+*/
         WilliamsR williamsR = new WilliamsR("Williams %R", inputClose.length);
-        //williamsR.setUseAsInput(true);
+        williamsR.setUseAsInput(true);
         williamsR.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
         stockIndicatorList.add(williamsR);
 
-        EMA5 ema5 = new EMA5("EMA 5", inputClose.length);
+  /*      EMA5 ema5 = new EMA5("EMA 5", inputClose.length);
         ema5.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
         stockIndicatorList.add(ema5);
 
@@ -155,7 +255,7 @@ public class PrepareData {
         EMA30 ema30 = new EMA30("EMA 30", inputClose.length);
         ema30.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
         stockIndicatorList.add(ema30);
-
+*/
 
         /*
          SMA10 sma10 = new SMA10("SMA 10", inputClose.length);
@@ -168,7 +268,7 @@ public class PrepareData {
 
 
         CCI cci = new CCI("CCI", inputClose.length);
-        //cci.setUseAsInput(true);
+        cci.setUseAsInput(true);
         cci.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
         stockIndicatorList.add(cci);
 
@@ -192,6 +292,12 @@ public class PrepareData {
          */
 
 
+        MFI mfi = new MFI("MFI", inputClose.length);
+        mfi.setUseAsInput(true);
+         mfi.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
+         stockIndicatorList.add(mfi);
+
+/*
         ADX adx = new ADX("ADX", inputClose.length);
         adx.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
         stockIndicatorList.add(adx);
@@ -204,7 +310,7 @@ public class PrepareData {
         DIMinus diMinus = new DIMinus("DI Minus", inputClose.length);
         diMinus.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
         stockIndicatorList.add(diMinus);
-
+*/
         MACD macd = new MACD("MACD", inputClose.length);
         macd.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
         //macd.setUseAsInput(true);
@@ -222,17 +328,29 @@ public class PrepareData {
 
         int maxLength = inputClose.length - maxBegIdx;
 
+        double[] forecast = new double[maxLength];
+        double[] forecastError = new double[maxLength];
+
+        double[] inputC0BodyColour = new double[maxLength];
+        double[] inputC0Body = new double[maxLength];
+        double[] inputC0UpperShadow = new double[maxLength];
+        double[] inputC0LowerShadow = new double[maxLength];
+        double[] inputC0OpenStyle = new double[maxLength];
+        double[] inputC0CloseStyle = new double[maxLength];
+
+        double[] outputVariation = new double[maxLength];
+
         // Put all scoring indicators last
         WilliamsRScore williamsRScore = new WilliamsRScore("Williams R Score", maxLength);
         williamsRScore.calculate(williamsR.getValues(), williamsR.getBegIdx(), maxBegIdx, maxLength);
         williamsRScore.setUseAsInput(true);
         stockIndicatorList.add(williamsRScore);
-
+/*
         ADXTrendScore adxTrendScore = new ADXTrendScore("ADX Trend Score", maxLength);
         adxTrendScore.calculate(adx.getValues(), adx.getBegIdx(), diPlus.getValues(), diPlus.getBegIdx(), diMinus.getValues(), diMinus.getBegIdx(), maxBegIdx, maxLength);
         adxTrendScore.setUseAsInput(true);
         stockIndicatorList.add(adxTrendScore);
-
+*/
         MACDPeakScore macdPeakScore = new MACDPeakScore("MACD Peak Score", maxLength);
         macdPeakScore.calculate(inputClose, macd.getValues(), macd.getBegIdx(), maxBegIdx, maxLength);
         macdPeakScore.setUseAsInput(true);
@@ -243,12 +361,13 @@ public class PrepareData {
         macdZeroScore.setUseAsInput(true);
         stockIndicatorList.add(macdZeroScore);
 
-        ERSTrendScore ersTrendScore = new ERSTrendScore("ERS Trend Score", maxLength);
+       /* ERSTrendScore ersTrendScore = new ERSTrendScore("ERS Trend Score", maxLength);
         ersTrendScore.calculate(ema5.getValues(), ema5.getBegIdx(), ema10.getValues(), ema10.getBegIdx(), rsi.getValues(), rsi.getBegIdx(), stochF.getValues(), stochF.getBegIdx(), stoch.getValues(), stoch.getBegIdx(), maxBegIdx, maxLength);
         ersTrendScore.setUseAsInput(true);
         stockIndicatorList.add(ersTrendScore);
+*/
 
-
+        /*
         System.out.println("EMA5 = " + ema5.getMostRecentValue() + ", idx = " + (ema5.getLength() - 1));
         System.out.println("EMA10 = " + ema10.getMostRecentValue() + ", idx = " + (ema10.getLength() - 1));
         System.out.println("EMA30 = " + ema30.getMostRecentValue() + ", idx = " + (ema30.getLength() - 1));
@@ -260,7 +379,7 @@ public class PrepareData {
         System.out.println("Williams R = " + williamsR.getMostRecentValue());
         System.out.println("DI+ = " + diPlus.getMostRecentValue());
         System.out.println("DI- = " + diMinus.getMostRecentValue());
-
+*/
         System.out.println("MACDBegIdx = " + macd.getBegIdx());
         System.out.println("MACD Length = " + macd.getLength());
 
@@ -268,9 +387,6 @@ public class PrepareData {
 
         System.out.println("maxBegIdx { inputDate: " + inputDate[maxBegIdx] + ", price: " + inputClose[maxBegIdx] + " }");
         System.out.println("maxLength { inputDate: " + inputDate[maxBegIdx + maxLength - 1] + ", price: " + inputClose[maxBegIdx + maxLength - 1] + " }");
-
-        ChartData chartData = new ChartData(ticker.getSymbol(), inputDate, inputOpen, inputHigh, inputLow, inputClose, maxBegIdx, maxLength, macd, macdPeakScore, macdZeroScore);
-        FileUtils.writeChartData(chartData);
 
         // Load candlestick patterns
         CandlestickUtility.loadPatterns();
@@ -310,8 +426,6 @@ public class PrepareData {
 
         double stepU = (maxU - minU) / 4.0D;
         minU = minU - (stepU / 2.0D);
-
-        LinguisticVariable variation = null;
 
         variation = new LinguisticVariable("variation");
 
@@ -563,7 +677,7 @@ public class PrepareData {
                 variation.setInputValue(varPct);
             }
 
-            trend.setInputValue(((ema5.getValues()[j] > ema10.getValues()[j]) ? 1.5 : (ema5.getValues()[j] == ema10.getValues()[j]) ? 1.0 : 0.5));
+//            trend.setInputValue(((ema5.getValues()[j] > ema10.getValues()[j]) ? 1.5 : (ema5.getValues()[j] == ema10.getValues()[j]) ? 1.0 : 0.5));
             c0Body.setInputValue(Math.max(inputOpen[j], inputClose[j]) - Math.min(inputOpen[j], inputClose[j]));
             c0BodyColour.setInputValue((inputClose[j] > inputOpen[j]) ? COLOUR_WHITE : (inputClose[j] == inputOpen[j]) ? COLOUR_CROSS : COLOUR_BLACK);
             c0OpenStyle.setInputValue(inputOpen[j]);
@@ -599,71 +713,109 @@ public class PrepareData {
 
 
             //if (j == maxBegIdx + maxLength - 1) {
-            if (inputDate[j].toString().contains("Wed Oct 05 00:00:00 EDT 2011")) {
-                c0Body.chart(true);
-                c0BodyColour.chart(true);
-                c0OpenStyle.chart(true);
-                c0CloseStyle.chart(true);
-                c0UpperShadow.chart(true);
-                c0LowerShadow.chart(true);
+          /*  if (inputDate[j].toString().contains("Wed Oct 05 00:00:00 EDT 2011")) {
+             c0Body.chart(true);
+             c0BodyColour.chart(true);
+             c0OpenStyle.chart(true);
+             c0CloseStyle.chart(true);
+             c0UpperShadow.chart(true);
+             c0LowerShadow.chart(true);
 
-                c1Body.chart(true);
-                c1BodyColour.chart(true);
-                c1OpenStyle.chart(true);
-                c1CloseStyle.chart(true);
-                c1UpperShadow.chart(true);
-                c1LowerShadow.chart(true);
+             c1Body.chart(true);
+             c1BodyColour.chart(true);
+             c1OpenStyle.chart(true);
+             c1CloseStyle.chart(true);
+             c1UpperShadow.chart(true);
+             c1LowerShadow.chart(true);
 
-                variation.chart(true);
+             variation.chart(true);
+             }*/
 
-                Object[] objArray;
-                String name;
-                double value;
+            Object[] objArray;
+            String name;
+            double value;
 
-                objArray = variation.fuzzifyFromMaxMembershipFunction();
-                name = (String) objArray[0];
-                value = (Double) objArray[1];
+            objArray = variation.translateFromMaxMF();
+            name = (String) objArray[0];
+            value = (Double) objArray[1];
 
-                System.out.println("variation max membership name: " + name);
-                System.out.println("variation max membership value: " + value);
+            System.out.println("variation = " + name + "[" + value + "]");
 
-                objArray = c0Body.fuzzifyFromMaxMembershipFunction();
-                name = (String) objArray[0];
-                value = (Double) objArray[1];
-                System.out.println("c0Body = " + name + " [" + value + "]");
+            objArray = c0Body.translateFromMaxMF();
+            name = (String) objArray[0];
+            value = (Double) objArray[1];
+            System.out.println("c0Body = " + name + " [" + value + "]");
 
-                objArray = c0BodyColour.fuzzifyFromMaxMembershipFunction();
-                name = (String) objArray[0];
-                value = (Double) objArray[1];
-                System.out.println("c0BodyColour = " + name + " [" + value + "]");
-
-
-                objArray = c0OpenStyle.fuzzifyFromMaxMembershipFunction();
-                name = (String) objArray[0];
-                value = (Double) objArray[1];
-                System.out.println("c0OpenStyle = " + name + " [" + value + "]");
+            objArray = c0BodyColour.translateFromMaxMF();
+            name = (String) objArray[0];
+            value = (Double) objArray[1];
+            System.out.println("c0BodyColour = " + name + " [" + value + "]");
 
 
-                objArray = c0CloseStyle.fuzzifyFromMaxMembershipFunction();
-                name = (String) objArray[0];
-                value = (Double) objArray[1];
-                System.out.println("c0CloseStyle = " + name + " [" + value + "]");
+            objArray = c0OpenStyle.translateFromMaxMF();
+            name = (String) objArray[0];
+            value = (Double) objArray[1];
+            System.out.println("c0OpenStyle = " + name + " [" + value + "]");
 
 
-                objArray = c0UpperShadow.fuzzifyFromMaxMembershipFunction();
-                name = (String) objArray[0];
-                value = (Double) objArray[1];
-                System.out.println("c0UpperShadow = " + name + " [" + value + "]");
+            objArray = c0CloseStyle.translateFromMaxMF();
+            name = (String) objArray[0];
+            value = (Double) objArray[1];
+            System.out.println("c0CloseStyle = " + name + " [" + value + "]");
 
 
-                objArray = c0LowerShadow.fuzzifyFromMaxMembershipFunction();
-                name = (String) objArray[0];
-                value = (Double) objArray[1];
-                System.out.println("c0LowerShadow = " + name + " [" + value + "]");
-
-            }
+            objArray = c0UpperShadow.translateFromMaxMF();
+            name = (String) objArray[0];
+            value = (Double) objArray[1];
+            System.out.println("c0UpperShadow = " + name + " [" + value + "]");
 
 
+            objArray = c0LowerShadow.translateFromMaxMF();
+            name = (String) objArray[0];
+            value = (Double) objArray[1];
+            System.out.println("c0LowerShadow = " + name + " [" + value + "]");
+            //}
+
+
+            // Retrieve fuzzy I/Os
+            //  Object[] objArray;
+            //  String name;
+            //  double value;
+
+            objArray = variation.translateFromMaxMF();
+            name = (String) objArray[0];
+            value = (Double) objArray[1];
+            outputVariation[j - maxBegIdx] = value;
+
+            objArray = c0Body.translateFromMaxMF();
+            name = (String) objArray[0];
+            value = (Double) objArray[1];
+            inputC0Body[j - maxBegIdx] = value;
+
+            objArray = c0BodyColour.translateFromMaxMF();
+            name = (String) objArray[0];
+            value = (Double) objArray[1];
+            inputC0BodyColour[j - maxBegIdx] = value;
+
+            objArray = c0UpperShadow.translateFromMaxMF();
+            name = (String) objArray[0];
+            value = (Double) objArray[1];
+            inputC0UpperShadow[j - maxBegIdx] = value;
+
+            objArray = c0LowerShadow.translateFromMaxMF();
+            name = (String) objArray[0];
+            value = (Double) objArray[1];
+            inputC0LowerShadow[j - maxBegIdx] = value;
+
+            objArray = c0OpenStyle.translateFromMaxMF();
+            name = (String) objArray[0];
+            value = (Double) objArray[1];
+            inputC0OpenStyle[j - maxBegIdx] = value;
+
+            objArray = c0CloseStyle.translateFromMaxMF();
+            name = (String) objArray[0];
+            value = (Double) objArray[1];
+            inputC0CloseStyle[j - maxBegIdx] = value;
 
             try {
                 fuzzyRules.evaluateBlock();
@@ -701,11 +853,36 @@ public class PrepareData {
             }
         }
 
+        NormalizeArray normArr;
+
+        // Normalize set
+        normArr = new NormalizeArray();
+        double[] inputC0BodyColourNorm = normArr.process(inputC0BodyColour);
+        // Normalize set
+        normArr = new NormalizeArray();
+        double[] inputC0BodyNorm = normArr.process(inputC0Body);
+        // Normalize set
+        normArr = new NormalizeArray();
+        double[] inputC0UpperShadowNorm = normArr.process(inputC0UpperShadow);
+        // Normalize set
+        normArr = new NormalizeArray();
+        double[] inputC0LowerShadowNorm = normArr.process(inputC0LowerShadow);
+        // Normalize set
+        normArr = new NormalizeArray();
+        double[] inputC0OpenStyleNorm = normArr.process(inputC0OpenStyle);
+        // Normalize set
+        normArr = new NormalizeArray();
+        double[] inputC0CloseStyleNorm = normArr.process(inputC0CloseStyle);
+        // Normalize set
+
+        NormalizeArray varNormArr = new NormalizeArray();
+        double[] outputVariationNorm = varNormArr.process(outputVariation);
+
         System.out.println("Close length: " + inputClose.length);
 
         int inputIndicators = 0;
         for (StockIndicator stockIndicator : stockIndicatorList) {
-            if (stockIndicator.useAsInput()) {
+            if (stockIndicator.useAsInput()) {                
                 inputIndicators++;
                 System.out.println("This indicator is an input.");
 
@@ -720,8 +897,12 @@ public class PrepareData {
         }
 
         // Prepare the input data
-        double[][] input = new double[maxLength][inputIndicators];
+        double[][] input = new double[maxLength][inputIndicators + 6];
         double[][] ideal = new double[maxLength][1];
+
+
+        double[][] inputO = new double[maxLength][inputIndicators + 6];
+        double[][] idealO = new double[maxLength][1];
 
 
         int inputIndicatorsUsed;
@@ -736,51 +917,82 @@ public class PrepareData {
                     break;
                 }
 
-                StockIndicator stockIndicator = stockIndicatorList.get(k);
-                if (stockIndicator.useAsInput()) {
-                    input[j][inputIndicatorsUsed] = stockIndicator.getNormValues()[j];
-                    inputIndicatorsUsed++;
-                }
+                 StockIndicator stockIndicator = stockIndicatorList.get(k);
+                 if (stockIndicator.useAsInput()) {
+                 input[j][inputIndicatorsUsed] = stockIndicator.getNormValues()[j];
+                 inputIndicatorsUsed++;
+                 }
             }
 
-            ideal[j][0] = direction[maxBegIdx + j];
+            inputO[j][inputIndicatorsUsed] = inputC0BodyColour[j];
+            inputO[j][inputIndicatorsUsed+1] = inputC0Body[j];
+            inputO[j][inputIndicatorsUsed+2] = inputC0UpperShadow[j];
+            inputO[j][inputIndicatorsUsed+3] = inputC0LowerShadow[j];
+            inputO[j][inputIndicatorsUsed+4] = inputC0OpenStyle[j];
+            inputO[j][inputIndicatorsUsed+5] = inputC0CloseStyle[j];            
+            idealO[j][0] = outputVariation[j];
 
-            System.out.println("direction[" + (maxBegIdx + j) + "]=" + direction[maxBegIdx + j]);
+            input[j][inputIndicatorsUsed] = inputC0BodyColourNorm[j];
+            input[j][inputIndicatorsUsed+1] = inputC0BodyNorm[j];
+            input[j][inputIndicatorsUsed+2] = inputC0UpperShadowNorm[j];
+            input[j][inputIndicatorsUsed+3] = inputC0LowerShadowNorm[j];
+            input[j][inputIndicatorsUsed+4] = inputC0OpenStyleNorm[j];
+            input[j][inputIndicatorsUsed+5] = inputC0CloseStyleNorm[j];
+            ideal[j][0] = outputVariationNorm[j];
+            
+            inputIndicatorsUsed += 6;
+
+
+            String inputStr;
+            inputStr = String.format("NN Original Data [" + j + "]: [%.2f, %.2f, %.2f, %.2f, %.2f, %.2f] -> [%.5f]", inputO[j][0], inputO[j][1], inputO[j][2], inputO[j][3], inputO[j][4], inputO[j][5], idealO[j][0]);
+            System.out.println(inputStr);
+            inputStr = String.format("NN Normalized Data [" + j + "]: [%.2f, %.2f, %.2f, %.2f, %.2f, %.2f] -> [%.5f]", input[j][0], input[j][1], input[j][2], input[j][3], input[j][4], input[j][5], ideal[j][0]);
+            System.out.println(inputStr);
+
+
+
+            //ideal[j][0] = direction[maxBegIdx + j];
+
+            //System.out.println("direction[" + (maxBegIdx + j) + "]=" + direction[maxBegIdx + j]);
         }
 
         // Sort and separate training and evaluation data
         ArrayList<DataWindow> upList = new ArrayList<DataWindow>(maxLength);
         ArrayList<DataWindow> downList = new ArrayList<DataWindow>(maxLength);
 
+        /*
+         int days = 4;
+         for (int j = 0; j < maxLength - (days - 1); j++) {
 
-        int days = 4;
-        for (int j = 0; j < maxLength - (days - 1); j++) {
+         BasicMLData[] windowArray = new BasicMLData[days];
 
-            BasicMLData[] windowArray = new BasicMLData[days];
+         double d = 0.0;
 
-            double d = 0.0;
+         windowArray[0] = new BasicMLData(Arrays.copyOf(input[j], input[j].length));
 
-            windowArray[0] = new BasicMLData(Arrays.copyOf(input[j], input[j].length));
+         for (int k = 1; k <= (days - 1); k++) {
+         windowArray[k] = new BasicMLData(Arrays.copyOf(input[j + k], input[j + k].length));
+         d = ideal[j + k][0];
+         }
 
-            for (int k = 1; k <= (days - 1); k++) {
-                windowArray[k] = new BasicMLData(Arrays.copyOf(input[j + k], input[j + k].length));
-                d = ideal[j + k][0];
-            }
+         // Set data window
+         DataWindow dataWindow = new DataWindow(windowArray);
+         // Set direction for window
+         dataWindow.setDirection(d);
 
-            // Set data window
-            DataWindow dataWindow = new DataWindow(windowArray);
-            // Set direction for window
-            dataWindow.setDirection(d);
-
-            if (d == 1.0) {
-                upList.add(dataWindow);
-            } else {
-                downList.add(dataWindow);
-            }
+         if (d == 1.0) {
+         upList.add(dataWindow);
+         } else {
+         downList.add(dataWindow);
+         }
 
 
-            System.out.println("Day #" + (j + 1) + ": " + dataWindow + ", direction = " + d);
-        }
+         System.out.println("Day #" + (j + 1) + ": " + dataWindow + ", direction = " + d);
+         }*/
+
+
+
+
 
 
         // Create training data set
@@ -789,52 +1001,196 @@ public class PrepareData {
         // Create evaluate data set
         evaluationSet = new BasicMLDataSet();
 
+
+        // Prepare inputs
+/*
+         input[j][0] = inputC0BodyColourNorm[j];
+         input[j][1] = inputC0BodyNorm[j];
+         input[j][2] = inputC0UpperShadowNorm[j];
+         input[j][3] = inputC0LowerShadowNorm[j];
+         input[j][4] = inputC0OpenStyleNorm[j];
+         input[j][5] = inputC0CloseStyleNorm[j];
+         ideal[j][0] = outputVariationNorm[j];
+         */
+        for (int j = 0; j < maxLength/2; j++) {
+            trainingSet.add(new BasicMLData(input[j]), new BasicMLData(ideal[j]));
+        }
+
+        for (int j = maxLength/2; j < maxLength; j++) {
+            evaluationSet.add(new BasicMLData(input[j]), new BasicMLData(ideal[j]));
+        }
+
         // Randomly distribute up's and down's (this makes training/evaluation fair)
         Random random = new Random(System.currentTimeMillis());
 
-        int j1 = 0;
-        int j2 = 0;
-        int w = 0;
+        /*
+         int j1 = 0;
+         int j2 = 0;
+         int w = 0;
 
-        while ((upList.size() > 0) || (downList.size() > 0)) {
+         while ((upList.size() > 0) || (downList.size() > 0)) {
 
-            if (upList.size() > 0) {
-                j1 = random.nextInt(upList.size());
-            }
+         if (upList.size() > 0) {
+         j1 = random.nextInt(upList.size());
+         }
 
-            if (downList.size() > 0) {
-                j2 = random.nextInt(downList.size());
-            }
+         if (downList.size() > 0) {
+         j2 = random.nextInt(downList.size());
+         }
 
-            w = (w == 1) ? 0 : 1;
+         w = (w == 1) ? 0 : 1;
 
-            if (w == 0) {
-                if (upList.size() > 0) {
-                    DataWindow dataWindow = upList.remove(j1);
-                    trainingSet.add(new BasicMLDataPair(dataWindow.getData(), new BasicMLData(dataWindow.getDirectionArray())));
-                }
+         if (w == 0) {
+         if (upList.size() > 0) {
+         DataWindow dataWindow = upList.remove(j1);
+         trainingSet.add(new BasicMLDataPair(dataWindow.getData(), new BasicMLData(dataWindow.getDirectionArray())));
+         }
 
-                if (downList.size() > 0) {
-                    DataWindow dataWindow = downList.remove(j2);
-                    trainingSet.add(new BasicMLDataPair(dataWindow.getData(), new BasicMLData(dataWindow.getDirectionArray())));
+         if (downList.size() > 0) {
+         DataWindow dataWindow = downList.remove(j2);
+         trainingSet.add(new BasicMLDataPair(dataWindow.getData(), new BasicMLData(dataWindow.getDirectionArray())));
 
-                }
-            } else {
-                if (upList.size() > 0) {
-                    DataWindow dataWindow = upList.remove(j1);
-                    evaluationSet.add(new BasicMLDataPair(dataWindow.getData(), new BasicMLData(dataWindow.getDirectionArray())));
+         }
+         } else {
+         if (upList.size() > 0) {
+         DataWindow dataWindow = upList.remove(j1);
+         evaluationSet.add(new BasicMLDataPair(dataWindow.getData(), new BasicMLData(dataWindow.getDirectionArray())));
 
-                }
+         }
 
-                if (downList.size() > 0) {
-                    DataWindow dataWindow = downList.remove(j2);
-                    evaluationSet.add(new BasicMLDataPair(dataWindow.getData(), new BasicMLData(dataWindow.getDirectionArray())));
+         if (downList.size() > 0) {
+         DataWindow dataWindow = downList.remove(j2);
+         evaluationSet.add(new BasicMLDataPair(dataWindow.getData(), new BasicMLData(dataWindow.getDirectionArray())));
 
-                }
-            }
-        }
+         }
+         }
+         }*/
 
         System.out.println("Training Set Size: " + trainingSet.size());
         System.out.println("Evaluation Set Size: " + evaluationSet.size());
+
+        // Write the training data to a file
+        EncogUtility.saveEGB(new File(dataDir, Config.TRAINING_FILE), trainingSet);
+        // Write the evaluation data to a file
+        EncogUtility.saveEGB(new File(dataDir, Config.EVALUATION_FILE), evaluationSet);
+
+        System.out.println("Training input set size: " + trainingSet.getInputSize());
+        System.out.println("Training ideal set size: " + trainingSet.getIdealSize());
+        System.out.println("Evaluation input set size: " + evaluationSet.getInputSize());
+        System.out.println("Evaluation ideal set size: " + evaluationSet.getIdealSize());
+
+        // create a network
+        BasicNetwork network = EncogUtility.simpleFeedForward(trainingSet.getInputSize(), Config.HIDDEN1_COUNT, Config.HIDDEN2_COUNT, trainingSet.getIdealSize(), true);
+
+        // save the network and the training
+        EncogDirectoryPersistence.saveObject(new File(dataDir, Config.NETWORK_FILE), network);
+
+        // Train the network
+        trainNetwork(network, trainingSet, false);
+
+        // Test the training set
+//        test(trainingSet, network);
+        // Test the evaluation set
+        //test(evaluationSet, network);
+
+
+        DecimalFormat format = new DecimalFormat("#0.0000");
+        int count = 0;
+        int correct = 0;
+
+
+        int n = 0;
+        double mse = 0.0D;
+        for (int j = maxLength/2; j < maxLength - 1; j++) {
+            MLData predictData = network.compute(new BasicMLData(input[j]));
+            System.out.println("predictData: " + predictData.getData(0));
+
+            double _high = varNormArr.getStats().getNormalizedHigh();
+            double _low = varNormArr.getStats().getNormalizedLow();
+            double _max = varNormArr.getStats().getActualHigh();
+            double _min = varNormArr.getStats().getActualLow();
+
+            double result = ((_min - _max) * predictData.getData(0) - _high * _min + _max * _low) / (_low - _high);
+
+            System.out.println("denormalized predictData: " + result + ", Date: " + inputDate[j + maxBegIdx]);
+
+            variation.setInputValue(result);
+
+            Object[] objArray;
+            String name;
+            double value;
+
+            objArray = variation.translateFromMaxMF();
+            name = (String) objArray[0];
+            value = (Double) objArray[1];
+
+            forecast[j + 1] = inputClose[j + maxBegIdx] + inputClose[j + maxBegIdx] * (value / 100.D);
+
+            System.out.println("variation: " + value + "%");
+            String str = String.format("[%.2f] -> [%.2f]", inputClose[j + maxBegIdx], forecast[j + 1]);
+            System.out.println(str);
+
+            n++;
+            forecastError[j + 1] = Math.abs(inputClose[j + 1 + maxBegIdx] - forecast[j + 1]);
+            
+            mse += Math.pow(forecastError[j + 1], 2);
+        }
+        
+        mse = mse / n; 
+
+        ChartData chartData = new ChartData(ticker.getSymbol(), inputDate, inputOpen, inputHigh, inputLow, inputClose, forecast, forecastError, maxBegIdx, maxLength, macd, macdPeakScore, macdZeroScore);
+        FileUtils.writeChartData(chartData);
+
+        System.out.println("MSE: " + mse);
+
+        /*
+         double threshold = 0.05D;
+         // if (diff < threshold) {
+         if ((actual >= 0) == (predict >= 0)) {
+         correct++;
+         }
+
+         count++;
+
+         String inputStr = String.format("[%.2f, %.2f, %.2f, %.2f, %.2f, %.2f]", input.getData()[0], input.getData()[1], input.getData()[2], input.getData()[3], input.getData()[4], input.getData()[5]);
+
+         System.out.println("Day " + count + ": inputStr=" + inputStr + ", actual="
+         + format.format(actual)
+         + ", predict=" + format.format(predict) + ", diff=" + diff);
+
+
+         System.out.println("Test Set Summary:");
+         double percent = (double) correct / (double) count;
+         System.out.println("Correct predictions:" + correct + "/" + count);
+         System.out.println("Prediction Accuracy:"
+         + format.format(percent * 100) + "%");
+         */
+
+        // Test and predict for tomorrow
+        /*
+         MLData input = pair.getInput();
+         MLData actualData = pair.getIdeal();
+         MLData predictData = network.compute(input);
+
+         // forecast[i+1] = close[i] + close[i](c/100);
+
+         double actual = actualData.getData(0);
+         double predict = predictData.getData(0);
+         double diff = Math.abs(predict - actual);
+
+         Direction actualDirection = determineDirection(actual);
+         Direction predictDirection = determineDirection(predict);
+
+         if (actualDirection == predictDirection) {
+         correct++;
+         }
+
+         count++;
+
+         System.out.println("Day " + count + ":actual="
+         + format.format(actual) + "(" + actualDirection + ")"
+         + ",predict=" + format.format(predict) + "("
+         + predictDirection + ")" + ",diff=" + diff);*/
+
     }
 }

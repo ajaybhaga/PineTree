@@ -22,6 +22,8 @@
 
 <div id="controller_chart" style="margin:20px;height:240px; width:100%;"></div>
 <div id="price_chart" style="margin:20px;height:240px; width:100%;"></div>
+<div id="forecast_chart" style="margin:20px;height:240px; width:100%;"></div>
+<div id="forecastError_chart" style="margin:20px;height:240px; width:100%;"></div>
 <div id="macd_chart" style="margin:20px;height:240px; width:100%;"></div>
 <div id="macd_zero_chart" style="margin:20px;height:240px; width:100%;"></div>
 <div id="macd_peak_chart" style="margin:20px;height:240px; width:100%;"></div>
@@ -189,12 +191,85 @@
           </table>'
       }
     });
+    
+    plot5 = $.jqplot('forecast_chart',[forecast,close],{
+      title: 'Prediction',
+      axesDefaults:{},
+      axes: {
+          xaxis: {
+              renderer:$.jqplot.DateAxisRenderer
+          },
+          yaxis: {
+              tickOptions:{ prefix: '' }
+          }
+      },
+
+      series:[{lineWidth:3, markerOptions: { show: false, size: 5 }},
+              {lineWidth:3, markerOptions: { show: false, size: 5 }}],
+                
+               
+      legend: {         
+        show: true,
+        location: 'se',     // compass direction, nw, n, ne, e, se, s, sw, w.
+        showLabels: true,
+        labels: ['Forecasted', 'Actual']
+      },      
+      
+      cursor:{
+          zoom:true,
+          constrainZoomTo: 'x',
+          tooltipOffset: 10,
+          tooltipLocation: 'nw'
+      },
+      highlighter: {
+          showMarker:false,
+          tooltipAxes: 'xy',
+          yvalues: 4,
+          formatString:'<table class="jqplot-highlighter"> \
+          <tr><td>Date:</td><td>%s</td></tr> \
+          <tr><td>Value:</td><td>%s</td></tr> \
+          </table>'
+      }
+    });
+    
+    plot6 = $.jqplot('forecastError_chart',[forecastError],{
+      title: 'Prediction Error',
+      axesDefaults:{},
+      axes: {
+          xaxis: {
+              renderer:$.jqplot.DateAxisRenderer
+          },
+          yaxis: {
+              tickOptions:{ prefix: '' }
+          }
+      },
+
+      series:[{lineWidth:3, markerOptions: { show: false, size: 5 }},
+              {lineWidth:3, markerOptions: { show: false, size: 5 }}],                               
+      
+      cursor:{
+          zoom:true,
+          constrainZoomTo: 'x',
+          tooltipOffset: 10,
+          tooltipLocation: 'nw'
+      },
+      highlighter: {
+          showMarker:false,
+          tooltipAxes: 'xy',
+          yvalues: 4,
+          formatString:'<table class="jqplot-highlighter"> \
+          <tr><td>Date:</td><td>%s</td></tr> \
+          <tr><td>Value:</td><td>%s</td></tr> \
+          </table>'
+      }
+    });
 
 $.jqplot.Cursor.zoomProxy(plot1, controller_plot);
 $.jqplot.Cursor.zoomProxy(plot2, controller_plot);
 $.jqplot.Cursor.zoomProxy(plot3, controller_plot);
 $.jqplot.Cursor.zoomProxy(plot4, controller_plot);
-
+$.jqplot.Cursor.zoomProxy(plot5, controller_plot);
+$.jqplot.Cursor.zoomProxy(plot6, controller_plot);
 
 });
 

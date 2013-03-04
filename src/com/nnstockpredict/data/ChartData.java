@@ -17,19 +17,23 @@ public class ChartData {
     private double[] inputHigh;
     private double[] inputLow;
     private double[] inputClose;
+    private double[] forecast;
+    private double[] forecastError;
     private int maxBegIdx;
     private int maxLength;
     private MACD macd;
     private MACDPeakScore macdPeakScore;
     private MACDZeroScore macdZeroScore;
 
-    public ChartData(String name, Date[] inputDate, double[] inputOpen, double[] inputHigh, double[] inputLow, double[] inputClose, int maxBegIdx, int maxLength, MACD macd, MACDPeakScore macdPeakScore, MACDZeroScore macdZeroScore) {
+    public ChartData(String name, Date[] inputDate, double[] inputOpen, double[] inputHigh, double[] inputLow, double[] inputClose, double[] forecast, double[] forecastError, int maxBegIdx, int maxLength, MACD macd, MACDPeakScore macdPeakScore, MACDZeroScore macdZeroScore) {
         this.name = name;
         this.inputDate = inputDate;
         this.inputOpen = inputOpen;
         this.inputHigh = inputHigh;
         this.inputLow = inputLow;
         this.inputClose = inputClose;
+        this.forecast = forecast;
+        this.forecastError = forecastError;
         this.maxBegIdx = maxBegIdx;
         this.maxLength = maxLength;
         this.macd = macd;
@@ -59,6 +63,14 @@ public class ChartData {
 
     public double[] getInputClose() {
         return inputClose;
+    }
+    
+    public double[] getForecast() {
+        return forecast;
+    }
+    
+    public double[] getForecastError() {
+        return forecastError;
     }
 
     public int getMaxBegIdx() {
