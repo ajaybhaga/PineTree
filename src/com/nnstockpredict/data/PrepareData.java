@@ -54,6 +54,16 @@ public class PrepareData {
         this.loader = loader;
         this.dataDir = dataDir;
     }
+    
+    public double getDirection(double value) {
+        if (value > 0.0D) {
+            return 1.0D;
+        } else if (value == 0.0D) {
+            return 0.0D;
+        } else {
+            return -1.0D;
+        }
+    }
 
     public MLDataSet getTrainingSet() {
         return trainingSet;
@@ -82,16 +92,16 @@ public class PrepareData {
 
             do {
                 train.iteration();
-/*
-                if (initialError == -9999.0D) {
-                    initialError = train.getError();
+                /*
+                 if (initialError == -9999.0D) {
+                 initialError = train.getError();
 
-                    if (initialError < 0.03D) {
-                        error = initialError - 0.02D;
-                    } else {
-                        error = 0.03D;
-                    }
-                }*/
+                 if (initialError < 0.03D) {
+                 error = initialError - 0.02D;
+                 } else {
+                 error = 0.03D;
+                 }
+                 }*/
                 error = 0.01D;
 
                 System.out.println("TRAINING - Epoch #" + epoch + " Error:" + train.getError());
@@ -99,9 +109,9 @@ public class PrepareData {
 
                 if (Math.abs(lastError - train.getError()) < 0.000000000001) {
                     System.out.println("Error difference too low (" + Math.abs(lastError - train.getError()) + ") ending training at Epoch #" + epoch + " Error:" + train.getError());
-                    break;                    
+                    break;
                 }
-                
+
                 if (epoch > 50000) {
                     break;
                 }
@@ -120,16 +130,16 @@ public class PrepareData {
             do {
                 //train.iteration();
                 trainFolded.iteration();
-/*
-                if (initialError == -9999.0D) {
-                    initialError = train.getError();
+                /*
+                 if (initialError == -9999.0D) {
+                 initialError = train.getError();
 
-                    if (initialError < 0.05D) {
-                        error = initialError - 0.02D;
-                    } else {
-                        error = 0.05D;
-                    }
-                }*/
+                 if (initialError < 0.05D) {
+                 error = initialError - 0.02D;
+                 } else {
+                 error = 0.05D;
+                 }
+                 }*/
                 error = 0.01D;
 
                 //  System.out.println("TRAINING - Epoch #" + epoch + " Error:" + train.getError());
@@ -175,7 +185,7 @@ public class PrepareData {
         double[] inputClose = new double[data.size()];
         double[] direction = new double[data.size()];
 
-        Date[] inputDate = new Date[data.size()];
+        Date[] inputDate = new Date[data.size() + 1]; // +1 for next day prediction
 
         int i = 0;
         for (final LoadedMarketData item : data) {
@@ -203,59 +213,67 @@ public class PrepareData {
             i++;
         }
 
-        List<StockIndicator> stockIndicatorList = new ArrayList<StockIndicator>(10);
+        // Add the next day into the date array
+        Calendar c = Calendar.getInstance();
+        c.setTime(inputDate[inputDate.length - 2]);
+        c.add(Calendar.DATE, 1);
+        inputDate[inputDate.length - 1] = c.getTime();
 
+        List<StockIndicator> stockIndicatorList = new ArrayList<StockIndicator>(10);
+/*
         OpenPrice openPrice = new OpenPrice("Open Price", inputOpen.length);
-        openPrice.setUseAsInput(true);
+        //openPrice.setUseAsInput(true);
         openPrice.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
         stockIndicatorList.add(openPrice);
 
         HighPrice highPrice = new HighPrice("High Price", inputHigh.length);
-        highPrice.setUseAsInput(true);
+        //highPrice.setUseAsInput(true);
         highPrice.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
         stockIndicatorList.add(highPrice);
 
         LowPrice lowPrice = new LowPrice("Low Price", inputLow.length);
-        lowPrice.setUseAsInput(true);
+        //lowPrice.setUseAsInput(true);
         lowPrice.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
         stockIndicatorList.add(lowPrice);
 
         ClosePrice closePrice = new ClosePrice("Close Price", inputClose.length);
-        closePrice.setUseAsInput(true);
+        //closePrice.setUseAsInput(true);
         closePrice.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
-        stockIndicatorList.add(closePrice);
+        stockIndicatorList.add(closePrice);*/
 
-      /*  RSI rsi = new RSI("RSI", inputClose.length);
-        //rsi.setUseAsInput(true);
-        rsi.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
-        stockIndicatorList.add(rsi);
+      /*    RSI rsi = new RSI("RSI", inputClose.length);
+         rsi.setUseAsInput(true);
+         rsi.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
+         stockIndicatorList.add(rsi);
 
-        Stoch stoch = new Stoch("Stoch %D", inputClose.length);
-        //stoch.setUseAsInput(true);
-        stoch.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
-        stockIndicatorList.add(stoch);
-
-        StochF stochF = new StochF("Stoch %K", inputClose.length);
-        stochF.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
-        stockIndicatorList.add(stochF);
-*/
+         Stoch stoch = new Stoch("Stoch %D", inputClose.length);
+         stoch.setUseAsInput(true);
+         stoch.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
+         stockIndicatorList.add(stoch);*/
+/*
+         StochF stochF = new StochF("Stoch %K", inputClose.length);
+         stochF.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
+         stockIndicatorList.add(stochF);
+         */
         WilliamsR williamsR = new WilliamsR("Williams %R", inputClose.length);
-        williamsR.setUseAsInput(true);
+        //williamsR.setUseAsInput(true);
         williamsR.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
         stockIndicatorList.add(williamsR);
+/*
+              EMA5 ema5 = new EMA5("EMA 5", inputClose.length);
+              ema5.setUseAsInput(true);
+         ema5.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
+         stockIndicatorList.add(ema5);
 
-  /*      EMA5 ema5 = new EMA5("EMA 5", inputClose.length);
-        ema5.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
-        stockIndicatorList.add(ema5);
-
-        EMA10 ema10 = new EMA10("EMA 10", inputClose.length);
-        ema10.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
-        stockIndicatorList.add(ema10);
-
-        EMA30 ema30 = new EMA30("EMA 30", inputClose.length);
-        ema30.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
-        stockIndicatorList.add(ema30);
-*/
+         EMA10 ema10 = new EMA10("EMA 10", inputClose.length);
+         ema10.setUseAsInput(true);
+         ema10.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
+         stockIndicatorList.add(ema10);*/
+/*
+         EMA30 ema30 = new EMA30("EMA 30", inputClose.length);
+         ema30.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
+         stockIndicatorList.add(ema30);
+         */
 
         /*
          SMA10 sma10 = new SMA10("SMA 10", inputClose.length);
@@ -277,7 +295,7 @@ public class PrepareData {
          * inputLow, inputVolume, inputOpen, inputClose);
          * stockIndicatorList.add(ad);
          */
-        /*
+/*        
          MFI mfi = new MFI("MFI", inputClose.length);
          mfi.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
          stockIndicatorList.add(mfi);
@@ -294,26 +312,26 @@ public class PrepareData {
 
         MFI mfi = new MFI("MFI", inputClose.length);
         mfi.setUseAsInput(true);
-         mfi.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
-         stockIndicatorList.add(mfi);
+        mfi.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
+        stockIndicatorList.add(mfi);
 
-/*
-        ADX adx = new ADX("ADX", inputClose.length);
-        adx.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
-        stockIndicatorList.add(adx);
+        /*
+         ADX adx = new ADX("ADX", inputClose.length);
+         adx.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
+         stockIndicatorList.add(adx);
 
-        DIPlus diPlus = new DIPlus("DI Plus", inputClose.length);
-        diPlus.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
-        stockIndicatorList.add(diPlus);
+         DIPlus diPlus = new DIPlus("DI Plus", inputClose.length);
+         diPlus.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
+         stockIndicatorList.add(diPlus);
 
 
-        DIMinus diMinus = new DIMinus("DI Minus", inputClose.length);
-        diMinus.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
-        stockIndicatorList.add(diMinus);
-*/
+         DIMinus diMinus = new DIMinus("DI Minus", inputClose.length);
+         diMinus.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
+         stockIndicatorList.add(diMinus);
+         */
         MACD macd = new MACD("MACD", inputClose.length);
         macd.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
-        //macd.setUseAsInput(true);
+     //   macd.setUseAsInput(true);
         stockIndicatorList.add(macd);
 
 
@@ -328,8 +346,9 @@ public class PrepareData {
 
         int maxLength = inputClose.length - maxBegIdx;
 
-        double[] forecast = new double[maxLength];
+        double[] forecast = new double[maxLength + 1]; // +1 for the next prediction
         double[] forecastError = new double[maxLength];
+        double[] forecastDirectionError = new double[maxLength];
 
         double[] inputC0BodyColour = new double[maxLength];
         double[] inputC0Body = new double[maxLength];
@@ -345,12 +364,12 @@ public class PrepareData {
         williamsRScore.calculate(williamsR.getValues(), williamsR.getBegIdx(), maxBegIdx, maxLength);
         williamsRScore.setUseAsInput(true);
         stockIndicatorList.add(williamsRScore);
-/*
-        ADXTrendScore adxTrendScore = new ADXTrendScore("ADX Trend Score", maxLength);
-        adxTrendScore.calculate(adx.getValues(), adx.getBegIdx(), diPlus.getValues(), diPlus.getBegIdx(), diMinus.getValues(), diMinus.getBegIdx(), maxBegIdx, maxLength);
-        adxTrendScore.setUseAsInput(true);
-        stockIndicatorList.add(adxTrendScore);
-*/
+        /*
+         ADXTrendScore adxTrendScore = new ADXTrendScore("ADX Trend Score", maxLength);
+         adxTrendScore.calculate(adx.getValues(), adx.getBegIdx(), diPlus.getValues(), diPlus.getBegIdx(), diMinus.getValues(), diMinus.getBegIdx(), maxBegIdx, maxLength);
+         adxTrendScore.setUseAsInput(true);
+         stockIndicatorList.add(adxTrendScore);
+         */
         MACDPeakScore macdPeakScore = new MACDPeakScore("MACD Peak Score", maxLength);
         macdPeakScore.calculate(inputClose, macd.getValues(), macd.getBegIdx(), maxBegIdx, maxLength);
         macdPeakScore.setUseAsInput(true);
@@ -361,25 +380,25 @@ public class PrepareData {
         macdZeroScore.setUseAsInput(true);
         stockIndicatorList.add(macdZeroScore);
 
-       /* ERSTrendScore ersTrendScore = new ERSTrendScore("ERS Trend Score", maxLength);
-        ersTrendScore.calculate(ema5.getValues(), ema5.getBegIdx(), ema10.getValues(), ema10.getBegIdx(), rsi.getValues(), rsi.getBegIdx(), stochF.getValues(), stochF.getBegIdx(), stoch.getValues(), stoch.getBegIdx(), maxBegIdx, maxLength);
-        ersTrendScore.setUseAsInput(true);
-        stockIndicatorList.add(ersTrendScore);
-*/
+        /* ERSTrendScore ersTrendScore = new ERSTrendScore("ERS Trend Score", maxLength);
+         ersTrendScore.calculate(ema5.getValues(), ema5.getBegIdx(), ema10.getValues(), ema10.getBegIdx(), rsi.getValues(), rsi.getBegIdx(), stochF.getValues(), stochF.getBegIdx(), stoch.getValues(), stoch.getBegIdx(), maxBegIdx, maxLength);
+         ersTrendScore.setUseAsInput(true);
+         stockIndicatorList.add(ersTrendScore);
+         */
 
         /*
-        System.out.println("EMA5 = " + ema5.getMostRecentValue() + ", idx = " + (ema5.getLength() - 1));
-        System.out.println("EMA10 = " + ema10.getMostRecentValue() + ", idx = " + (ema10.getLength() - 1));
-        System.out.println("EMA30 = " + ema30.getMostRecentValue() + ", idx = " + (ema30.getLength() - 1));
-        System.out.println("RSI = " + rsi.getMostRecentValue() + ", idx = " + (rsi.getLength() - 1));
-        System.out.println("Stoch = " + stoch.getMostRecentValue() + ", idx = " + (stoch.getLength() - 1));
-        System.out.println("Stoch F = " + stochF.getMostRecentValue() + ", idx = " + (stochF.getLength() - 1));
-        System.out.println("ERS = " + ersTrendScore.getMostRecentValue() + ", idx = " + (ersTrendScore.getLength() - 1));
+         System.out.println("EMA5 = " + ema5.getMostRecentValue() + ", idx = " + (ema5.getLength() - 1));
+         System.out.println("EMA10 = " + ema10.getMostRecentValue() + ", idx = " + (ema10.getLength() - 1));
+         System.out.println("EMA30 = " + ema30.getMostRecentValue() + ", idx = " + (ema30.getLength() - 1));
+         System.out.println("RSI = " + rsi.getMostRecentValue() + ", idx = " + (rsi.getLength() - 1));
+         System.out.println("Stoch = " + stoch.getMostRecentValue() + ", idx = " + (stoch.getLength() - 1));
+         System.out.println("Stoch F = " + stochF.getMostRecentValue() + ", idx = " + (stochF.getLength() - 1));
+         System.out.println("ERS = " + ersTrendScore.getMostRecentValue() + ", idx = " + (ersTrendScore.getLength() - 1));
 
-        System.out.println("Williams R = " + williamsR.getMostRecentValue());
-        System.out.println("DI+ = " + diPlus.getMostRecentValue());
-        System.out.println("DI- = " + diMinus.getMostRecentValue());
-*/
+         System.out.println("Williams R = " + williamsR.getMostRecentValue());
+         System.out.println("DI+ = " + diPlus.getMostRecentValue());
+         System.out.println("DI- = " + diMinus.getMostRecentValue());
+         */
         System.out.println("MACDBegIdx = " + macd.getBegIdx());
         System.out.println("MACD Length = " + macd.getLength());
 
@@ -882,7 +901,7 @@ public class PrepareData {
 
         int inputIndicators = 0;
         for (StockIndicator stockIndicator : stockIndicatorList) {
-            if (stockIndicator.useAsInput()) {                
+            if (stockIndicator.useAsInput()) {
                 inputIndicators++;
                 System.out.println("This indicator is an input.");
 
@@ -917,29 +936,29 @@ public class PrepareData {
                     break;
                 }
 
-                 StockIndicator stockIndicator = stockIndicatorList.get(k);
-                 if (stockIndicator.useAsInput()) {
-                 input[j][inputIndicatorsUsed] = stockIndicator.getNormValues()[j];
-                 inputIndicatorsUsed++;
-                 }
+                StockIndicator stockIndicator = stockIndicatorList.get(k);
+                if (stockIndicator.useAsInput()) {
+                    input[j][inputIndicatorsUsed] = stockIndicator.getNormValues()[j];
+                    inputIndicatorsUsed++;
+                }
             }
 
             inputO[j][inputIndicatorsUsed] = inputC0BodyColour[j];
-            inputO[j][inputIndicatorsUsed+1] = inputC0Body[j];
-            inputO[j][inputIndicatorsUsed+2] = inputC0UpperShadow[j];
-            inputO[j][inputIndicatorsUsed+3] = inputC0LowerShadow[j];
-            inputO[j][inputIndicatorsUsed+4] = inputC0OpenStyle[j];
-            inputO[j][inputIndicatorsUsed+5] = inputC0CloseStyle[j];            
+            inputO[j][inputIndicatorsUsed + 1] = inputC0Body[j];
+            inputO[j][inputIndicatorsUsed + 2] = inputC0UpperShadow[j];
+            inputO[j][inputIndicatorsUsed + 3] = inputC0LowerShadow[j];
+            inputO[j][inputIndicatorsUsed + 4] = inputC0OpenStyle[j];
+            inputO[j][inputIndicatorsUsed + 5] = inputC0CloseStyle[j];
             idealO[j][0] = outputVariation[j];
 
             input[j][inputIndicatorsUsed] = inputC0BodyColourNorm[j];
-            input[j][inputIndicatorsUsed+1] = inputC0BodyNorm[j];
-            input[j][inputIndicatorsUsed+2] = inputC0UpperShadowNorm[j];
-            input[j][inputIndicatorsUsed+3] = inputC0LowerShadowNorm[j];
-            input[j][inputIndicatorsUsed+4] = inputC0OpenStyleNorm[j];
-            input[j][inputIndicatorsUsed+5] = inputC0CloseStyleNorm[j];
+            input[j][inputIndicatorsUsed + 1] = inputC0BodyNorm[j];
+            input[j][inputIndicatorsUsed + 2] = inputC0UpperShadowNorm[j];
+            input[j][inputIndicatorsUsed + 3] = inputC0LowerShadowNorm[j];
+            input[j][inputIndicatorsUsed + 4] = inputC0OpenStyleNorm[j];
+            input[j][inputIndicatorsUsed + 5] = inputC0CloseStyleNorm[j];
             ideal[j][0] = outputVariationNorm[j];
-            
+
             inputIndicatorsUsed += 6;
 
 
@@ -1012,11 +1031,11 @@ public class PrepareData {
          input[j][5] = inputC0CloseStyleNorm[j];
          ideal[j][0] = outputVariationNorm[j];
          */
-        for (int j = 0; j < maxLength/2; j++) {
+        for (int j = 0; j < maxLength / 2; j++) {
             trainingSet.add(new BasicMLData(input[j]), new BasicMLData(ideal[j]));
         }
 
-        for (int j = maxLength/2; j < maxLength; j++) {
+        for (int j = maxLength / 2; j < maxLength; j++) {
             evaluationSet.add(new BasicMLData(input[j]), new BasicMLData(ideal[j]));
         }
 
@@ -1101,7 +1120,8 @@ public class PrepareData {
 
         int n = 0;
         double mse = 0.0D;
-        for (int j = maxLength/2; j < maxLength - 1; j++) {
+        double directionalMse = 0.0D;
+        for (int j = maxLength / 2; j < maxLength; j++) {
             MLData predictData = network.compute(new BasicMLData(input[j]));
             System.out.println("predictData: " + predictData.getData(0));
 
@@ -1130,18 +1150,27 @@ public class PrepareData {
             String str = String.format("[%.2f] -> [%.2f]", inputClose[j + maxBegIdx], forecast[j + 1]);
             System.out.println(str);
 
-            n++;
-            forecastError[j + 1] = Math.abs(inputClose[j + 1 + maxBegIdx] - forecast[j + 1]);
-            
-            mse += Math.pow(forecastError[j + 1], 2);
-        }
-        
-        mse = mse / n; 
 
-        ChartData chartData = new ChartData(ticker.getSymbol(), inputDate, inputOpen, inputHigh, inputLow, inputClose, forecast, forecastError, maxBegIdx, maxLength, macd, macdPeakScore, macdZeroScore);
+            if (j < maxLength - 1) {
+                n++;
+                forecastError[j + 1] = Math.abs(inputClose[j + 1 + maxBegIdx] - forecast[j + 1]);
+                mse += Math.pow(forecastError[j + 1], 2);
+                                
+                System.out.println(String.format("DIRECTION COMPARE: inputClose [%.2f], direction [%.2f] ? forecast [%.2f], direction [%.2f]", inputClose[j + 1 + maxBegIdx], getDirection(inputClose[j + 1 + maxBegIdx]-inputClose[j + maxBegIdx]), forecast[j + 1], getDirection(forecast[j + 1]-inputClose[j + maxBegIdx])));
+
+                forecastDirectionError[j + 1] = (getDirection(inputClose[j + 1 + maxBegIdx]-inputClose[j + maxBegIdx]) == getDirection(forecast[j + 1]-inputClose[j + maxBegIdx])) ? 0 : 1;
+                directionalMse += Math.pow(forecastDirectionError[j + 1], 2);
+            }
+        }
+
+        mse = mse / n;
+        directionalMse = directionalMse / n;
+        
+
+        ChartData chartData = new ChartData(ticker.getSymbol(), inputDate, inputOpen, inputHigh, inputLow, inputClose, forecast, forecastError, forecastDirectionError, maxBegIdx, maxLength, macd, macdPeakScore, macdZeroScore, mfi, cci);
         FileUtils.writeChartData(chartData);
 
-        System.out.println("MSE: " + mse);
+        System.out.println("MSE: " + mse + ", Directional MSE: " + directionalMse);
 
         /*
          double threshold = 0.05D;

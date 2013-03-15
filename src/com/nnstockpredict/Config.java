@@ -58,8 +58,6 @@ public class Config {
     // (RSI,STOCH K, STOCH D,MACD,ATR,MACD peak), (90, 0) = 70.339% TQQQ
     
     // Prune: 21, 12
-    public static final int HIDDEN1_COUNT = 30;
-    public static final int HIDDEN2_COUNT = 0;
-    public static final int TRAINING_DATA_SET_PERCENTAGE = 50;
-    public static final int EVALUATE_DATA_SET_PERCENTAGE = 100 - TRAINING_DATA_SET_PERCENTAGE;
+    public static final int HIDDEN1_COUNT = 20;
+    public static final int HIDDEN2_COUNT = 10;
 }

@@ -26,6 +26,6 @@ public class CCI extends StockIndicator {
         Core core = new Core();
 
         // Calculate CCI
-        checkRange(core.cci(0, inputClose.length - 1, inputHigh, inputLow, inputClose, 20, begIdx, length, value));
+        checkRange(core.cci(0, inputClose.length - 1, inputHigh, inputLow, inputClose, 50, begIdx, length, value));
     }
 }

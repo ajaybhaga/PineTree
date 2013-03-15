@@ -1,8 +1,10 @@
 package com.nnstockpredict.data;
 
+import com.nnstockpredict.data.indicator.CCI;
 import com.nnstockpredict.data.indicator.MACD;
 import com.nnstockpredict.data.indicator.MACDPeakScore;
 import com.nnstockpredict.data.indicator.MACDZeroScore;
+import com.nnstockpredict.data.indicator.MFI;
 import java.util.Date;
 
 /**
@@ -19,13 +21,16 @@ public class ChartData {
     private double[] inputClose;
     private double[] forecast;
     private double[] forecastError;
+    private double[] forecastDirectionError;
     private int maxBegIdx;
     private int maxLength;
     private MACD macd;
     private MACDPeakScore macdPeakScore;
     private MACDZeroScore macdZeroScore;
+    private MFI mfi;
+    private CCI cci;
 
-    public ChartData(String name, Date[] inputDate, double[] inputOpen, double[] inputHigh, double[] inputLow, double[] inputClose, double[] forecast, double[] forecastError, int maxBegIdx, int maxLength, MACD macd, MACDPeakScore macdPeakScore, MACDZeroScore macdZeroScore) {
+    public ChartData(String name, Date[] inputDate, double[] inputOpen, double[] inputHigh, double[] inputLow, double[] inputClose, double[] forecast, double[] forecastError, double[] forecastDirectionError, int maxBegIdx, int maxLength, MACD macd, MACDPeakScore macdPeakScore, MACDZeroScore macdZeroScore, MFI mfi, CCI cci) {
         this.name = name;
         this.inputDate = inputDate;
         this.inputOpen = inputOpen;
@@ -34,13 +39,16 @@ public class ChartData {
         this.inputClose = inputClose;
         this.forecast = forecast;
         this.forecastError = forecastError;
+        this.forecastDirectionError = forecastDirectionError;
         this.maxBegIdx = maxBegIdx;
         this.maxLength = maxLength;
         this.macd = macd;
         this.macdPeakScore = macdPeakScore;
         this.macdZeroScore = macdZeroScore;
+        this.mfi = mfi;
+        this.cci = cci;
     }
-    
+
     public String getName() {
         return name;
     }
@@ -64,19 +72,23 @@ public class ChartData {
     public double[] getInputClose() {
         return inputClose;
     }
-    
+
     public double[] getForecast() {
         return forecast;
     }
-    
+
     public double[] getForecastError() {
         return forecastError;
+    }
+
+    public double[] getForecastDirectionError() {
+        return forecastDirectionError;
     }
 
     public int getMaxBegIdx() {
         return maxBegIdx;
     }
-    
+
     public int getMaxLength() {
         return maxLength;
     }
@@ -91,5 +103,13 @@ public class ChartData {
 
     public MACDZeroScore getMACDZeroScore() {
         return macdZeroScore;
+    }
+
+    public MFI getMFI() {
+        return mfi;
+    }
+
+    public CCI getCCI() {
+        return cci;
     }
 }

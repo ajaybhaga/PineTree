@@ -24,9 +24,12 @@
 <div id="price_chart" style="margin:20px;height:240px; width:100%;"></div>
 <div id="forecast_chart" style="margin:20px;height:240px; width:100%;"></div>
 <div id="forecastError_chart" style="margin:20px;height:240px; width:100%;"></div>
+<div id="forecastDirectionError_chart" style="margin:20px;height:240px; width:100%;"></div>
 <div id="macd_chart" style="margin:20px;height:240px; width:100%;"></div>
 <div id="macd_zero_chart" style="margin:20px;height:240px; width:100%;"></div>
 <div id="macd_peak_chart" style="margin:20px;height:240px; width:100%;"></div>
+<div id="mfi_chart" style="margin:20px;height:240px; width:100%;"></div>
+<div id="cci_chart" style="margin:20px;height:240px; width:100%;"></div>
 
 <script type="text/javascript">$(document).ready(function(){
     $.jqplot.config.enablePlugins = true;
@@ -108,7 +111,7 @@
           }
       },
 
-      series:[{lineWidth:2, color: '#711D9F'}],
+      series:[{lineWidth:2, color: '#711D9F', markerOptions: {show: false}}],
       
       
       cursor:{
@@ -140,7 +143,7 @@
           }
       },
 
-      series:[{lineWidth:2, color: '#9F1D40'}],
+      series:[{lineWidth:2, color: '#9F1D40', markerOptions: {show: false}}],
       
       
       cursor:{
@@ -172,7 +175,7 @@
           }
       },
 
-      series:[{lineWidth:2, color: '#1D9F4F'}],
+      series:[{lineWidth:2, color: '#1D9F4F', markerOptions: {show: false}}],
       
       
       cursor:{
@@ -263,13 +266,112 @@
           </table>'
       }
     });
+    
+    plot7 = $.jqplot('forecastDirectionError_chart',[forecastDirectionError],{
+      title: 'Prediction Direction Error',
+      axesDefaults:{},
+      axes: {
+          xaxis: {
+              renderer:$.jqplot.DateAxisRenderer
+          },
+          yaxis: {
+              tickOptions:{ prefix: '' }
+          }
+      },
+
+      series:[{lineWidth:3, markerOptions: { show: false, size: 5 }},
+              {lineWidth:3, markerOptions: { show: false, size: 5 }}],                               
+      
+      cursor:{
+          zoom:true,
+          constrainZoomTo: 'x',
+          tooltipOffset: 10,
+          tooltipLocation: 'nw'
+      },
+      highlighter: {
+          showMarker:false,
+          tooltipAxes: 'xy',
+          yvalues: 4,
+          formatString:'<table class="jqplot-highlighter"> \
+          <tr><td>Date:</td><td>%s</td></tr> \
+          <tr><td>Value:</td><td>%s</td></tr> \
+          </table>'
+      }
+    });
+    
+    plot8 = $.jqplot('mfi_chart',[MFI],{
+      title: 'MFI Chart',
+      axesDefaults:{},
+      axes: {
+          xaxis: {
+              renderer:$.jqplot.DateAxisRenderer
+          },
+          yaxis: {
+              tickOptions:{ prefix: '' }
+          }
+      },
+
+      series:[{lineWidth:2, color: '#D41964', markerOptions: {show: false}}],      
+      
+      cursor:{
+          zoom:true,
+          constrainZoomTo: 'x',
+          tooltipOffset: 10,
+          tooltipLocation: 'nw'
+      },
+      highlighter: {
+          showMarker:false,
+          tooltipAxes: 'xy',
+          yvalues: 4,
+          formatString:'<table class="jqplot-highlighter"> \
+          <tr><td>Date:</td><td>%s</td></tr> \
+          <tr><td>Value:</td><td>%s</td></tr> \
+          </table>'
+      }
+    });
+    
+    plot9 = $.jqplot('cci_chart',[CCI],{
+      title: 'CCI Chart',
+      axesDefaults:{},
+      axes: {
+          xaxis: {
+              renderer:$.jqplot.DateAxisRenderer
+          },
+          yaxis: {
+              tickOptions:{ prefix: '' }
+          }
+      },
+
+      series:[{lineWidth:2, color: '#D4BE19', markerOptions: {show: false}}],
+      
+      
+      cursor:{
+          zoom:true,
+          constrainZoomTo: 'x',
+          tooltipOffset: 10,
+          tooltipLocation: 'nw'
+      },
+      highlighter: {
+          showMarker:false,
+          tooltipAxes: 'xy',
+          yvalues: 4,
+          formatString:'<table class="jqplot-highlighter"> \
+          <tr><td>Date:</td><td>%s</td></tr> \
+          <tr><td>Value:</td><td>%s</td></tr> \
+          </table>'
+      }
+    });
 
 $.jqplot.Cursor.zoomProxy(plot1, controller_plot);
 $.jqplot.Cursor.zoomProxy(plot2, controller_plot);
 $.jqplot.Cursor.zoomProxy(plot3, controller_plot);
 $.jqplot.Cursor.zoomProxy(plot4, controller_plot);
-$.jqplot.Cursor.zoomProxy(plot5, controller_plot);
+//$.jqplot.Cursor.zoomProxy(plot5, controller_plot);
 $.jqplot.Cursor.zoomProxy(plot6, controller_plot);
+$.jqplot.Cursor.zoomProxy(plot7, controller_plot);
+$.jqplot.Cursor.zoomProxy(plot8, controller_plot);
+$.jqplot.Cursor.zoomProxy(plot9, controller_plot);
+
 
 });
 
