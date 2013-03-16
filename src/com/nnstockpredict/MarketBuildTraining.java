@@ -23,20 +23,16 @@
  */
 package com.nnstockpredict;
 
-import com.nnstockpredict.Utility.loader.CustomYahooFinanceLoader;
+import com.nnstockpredict.Utility.loader.EODFinanceLoader;
 import com.nnstockpredict.data.PrepareData;
 import java.io.File;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import org.encog.engine.network.activation.ActivationSigmoid;
 import org.encog.engine.network.activation.ActivationTANH;
-import org.encog.ml.data.MLDataSet;
 import org.encog.ml.data.market.loader.MarketLoader;
-import org.encog.ml.data.market.loader.YahooFinanceLoader;
 import org.encog.neural.networks.BasicNetwork;
 import org.encog.neural.pattern.ElmanPattern;
-import org.encog.persist.EncogDirectoryPersistence;
-import org.encog.util.simple.EncogUtility;
 
 /**
  * Build the training data for the prediction and store it in an Encog file for
@@ -85,19 +81,23 @@ public class MarketBuildTraining {
     public static void generate(String symbol, File dataDir) {
 
         // Retrieve stock data from Yahoo web service
-        final MarketLoader loader = new CustomYahooFinanceLoader();
+        final MarketLoader loader = new EODFinanceLoader();        
 
         Calendar end = new GregorianCalendar();// end today
         Calendar begin = (Calendar) end.clone();
 
         // Gather training data for the last 2 years, stopping 60 days short of today.
-        // The 60 days will be used to evaluate prediction.
-        begin.add(Calendar.DATE, -1);
-        //end.add(Calendar.DATE, 0);
-        begin.add(Calendar.YEAR, -5);
+        // The 60 days will be used to evaluate prediction.        
+        //begin.add(Calendar.YEAR, -2);
+        //begin.add(Calendar.DATE, -364);
+        
+        begin.add(Calendar.DATE, -30);
+        
 
         // Prepare data inputs
         PrepareData prepareData = new PrepareData(loader, dataDir);
-        prepareData.load(symbol, begin.getTime(), end.getTime());        
+        prepareData.load(symbol, begin.getTime(), end.getTime(), 1, Calendar.DATE);
+        prepareData.load(symbol, begin.getTime(), end.getTime(), 2, Calendar.DATE);
+        prepareData.load(symbol, begin.getTime(), end.getTime(), 4, Calendar.DATE);
     }
 }

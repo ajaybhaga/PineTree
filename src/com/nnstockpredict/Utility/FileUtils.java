@@ -5,15 +5,8 @@
 package com.nnstockpredict.Utility;
 
 import com.nnstockpredict.data.ChartData;
-import com.nnstockpredict.data.indicator.ClosePrice;
-import com.nnstockpredict.data.indicator.HighPrice;
-import com.nnstockpredict.data.indicator.LowPrice;
-import com.nnstockpredict.data.indicator.OpenPrice;
 import java.io.*;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -21,7 +14,7 @@ import java.util.logging.Logger;
  */
 public class FileUtils {
 
-    static public final String dataFilename = "data.js";
+    static public final String dataFilename = "data_%d.js";
 
     /**
      * Fetch the entire contents of a text file, and return it in a String. This
@@ -29,31 +22,29 @@ public class FileUtils {
      *
      * @param aFile is a file which already exists and can be read.
      */
-    static public String getContents(File aFile) {
+    static public String getContents(File aFile, boolean lineSeparator) throws IOException {
         //...checks on aFile are elided
         StringBuilder contents = new StringBuilder();
 
+        //use buffering, reading one line at a time
+        //FileReader always assumes default encoding is OK!
+        BufferedReader input = new BufferedReader(new FileReader(aFile));
         try {
-            //use buffering, reading one line at a time
-            //FileReader always assumes default encoding is OK!
-            BufferedReader input = new BufferedReader(new FileReader(aFile));
-            try {
-                String line = null; //not declared within while loop
+            String line = null; //not declared within while loop
         /*
-                 * readLine is a bit quirky :
-                 * it returns the content of a line MINUS the newline.
-                 * it returns null only for the END of the stream.
-                 * it returns an empty String if two newlines appear in a row.
-                 */
-                while ((line = input.readLine()) != null) {
-                    contents.append(line);
+             * readLine is a bit quirky :
+             * it returns the content of a line MINUS the newline.
+             * it returns null only for the END of the stream.
+             * it returns an empty String if two newlines appear in a row.
+             */
+            while ((line = input.readLine()) != null) {
+                contents.append(line);
+                if (lineSeparator) {
                     contents.append(System.getProperty("line.separator"));
                 }
-            } finally {
-                input.close();
             }
-        } catch (IOException ex) {
-            ex.printStackTrace();
+        } finally {
+            input.close();
         }
 
         return contents.toString();
@@ -65,13 +56,23 @@ public class FileUtils {
      *
      * This style of implementation throws all exceptions to the caller.
      *
-     * @param aFile is an existing file which can be written to.
+     * @param aFile is a file which can be written to.
      * @throws IllegalArgumentException if param does not comply.
      * @throws FileNotFoundException if the file does not exist.
      * @throws IOException if problem encountered during write.
      */
     static public void setContents(File aFile, String aContents)
             throws FileNotFoundException, IOException {
+
+        // If file doesn't exists, then create it
+        if (!aFile.exists()) {
+            try {
+                aFile.createNewFile();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+
         if (aFile == null) {
             throw new IllegalArgumentException("File should not be null.");
         }
@@ -136,14 +137,14 @@ public class FileUtils {
      */
     public static void test(String... aArguments) throws IOException {
         File testFile = new File("C:\\Temp\\blah.txt");
-        System.out.println("Original file contents: " + getContents(testFile));
+        System.out.println("Original file contents: " + getContents(testFile, true));
         setContents(testFile, "The content of this file has been overwritten...");
-        System.out.println("New file contents: " + getContents(testFile));
+        System.out.println("New file contents: " + getContents(testFile, true));
     }
 
-    static public void writeChartData(ChartData chartData) {
+    static public void writeChartData(ChartData chartData, int forwardStep) {
 
-        File dataFile = new File(dataFilename);
+        File dataFile = new File(String.format(dataFilename, forwardStep));
 
         // if file doesnt exists, then create it
         if (!dataFile.exists()) {
@@ -162,15 +163,17 @@ public class FileUtils {
         } catch (IOException ex) {
             ex.printStackTrace();
         }
+        
+        //%m/%d/%Y %H:%M:%S
 
-        String pattern = "MM/dd/yyyy";
+        String pattern = "MM/dd/yyyy HH:mm:ss";
         SimpleDateFormat format = new SimpleDateFormat(pattern);
 
         try {
 
             output.write("name = '" + chartData.getName() + "';\n");
 
-            output.write("ohlc = [");
+            output.write("ohlc_" + forwardStep + " = [");
             for (int i = chartData.getMaxBegIdx(); i < chartData.getInputClose().length; i++) {
                 String dateStr = format.format(chartData.getInputDate()[i]);
 
@@ -182,7 +185,7 @@ public class FileUtils {
             }
             output.write("];\n");
 
-            output.write("close = [");
+            output.write("close_" + forwardStep + " = [");
             for (int i = chartData.getMaxBegIdx(); i < chartData.getInputClose().length; i++) {
                 String dateStr = format.format(chartData.getInputDate()[i]);
 
@@ -194,7 +197,7 @@ public class FileUtils {
             }
             output.write("];\n");
 
-            output.write("forecast = [");
+            output.write("forecast_" + forwardStep + " = [");
             for (int i = 0; i < chartData.getForecast().length; i++) {
                 String dateStr = format.format(chartData.getInputDate()[chartData.getMaxBegIdx() + i]);
 
@@ -206,7 +209,7 @@ public class FileUtils {
             }
             output.write("];\n");
 
-            output.write("forecastError = [");
+            output.write("forecastError_" + forwardStep + " = [");
             for (int i = 0; i < chartData.getForecastError().length; i++) {
                 String dateStr = format.format(chartData.getInputDate()[chartData.getMaxBegIdx() + i]);
 
@@ -218,7 +221,7 @@ public class FileUtils {
             }
             output.write("];\n");
 
-            output.write("forecastDirectionError = [");
+            output.write("forecastDirectionError_" + forwardStep + " = [");
             for (int i = 0; i < chartData.getForecastDirectionError().length; i++) {
                 String dateStr = format.format(chartData.getInputDate()[chartData.getMaxBegIdx() + i]);
 
@@ -230,7 +233,7 @@ public class FileUtils {
             }
             output.write("];\n");
 
-            output.write("macd = [");
+            output.write("macd_" + forwardStep + " = [");
             for (int i = 0; i < Math.min(chartData.getMACD().getLength(), chartData.getMaxLength()); i++) {
                 String dateStr = format.format(chartData.getInputDate()[chartData.getMaxBegIdx() + i]);
 
@@ -242,7 +245,7 @@ public class FileUtils {
             }
             output.write("];\n");
 
-            output.write("macdZeroScore = [");
+            output.write("macdZeroScore_" + forwardStep + " = [");
             for (int i = 0; i < Math.min(chartData.getMACDZeroScore().getLength(), chartData.getMaxLength()); i++) {
                 String dateStr = format.format(chartData.getInputDate()[chartData.getMaxBegIdx() + i]);
 
@@ -254,7 +257,7 @@ public class FileUtils {
             }
             output.write("];\n");
 
-            output.write("macdPeak = [");
+            output.write("macdPeak_" + forwardStep + " = [");
             for (int i = 0; i < Math.min(chartData.getMACDPeak().getLength(), chartData.getMaxLength()); i++) {
                 String dateStr = format.format(chartData.getInputDate()[chartData.getMaxBegIdx() + i]);
 
@@ -266,7 +269,7 @@ public class FileUtils {
             }
             output.write("];\n");
 
-            output.write("macdPeakScore = [");
+            output.write("macdPeakScore_" + forwardStep + " = [");
             for (int i = 0; i < Math.min(chartData.getMACDPeakScore().getLength(), chartData.getMaxLength()); i++) {
                 String dateStr = format.format(chartData.getInputDate()[chartData.getMaxBegIdx() + i]);
 
@@ -278,7 +281,7 @@ public class FileUtils {
             }
             output.write("];\n");
 
-            output.write("MFI = [");
+            output.write("MFI_" + forwardStep + " = [");
             for (int i = 0; i < Math.min(chartData.getMFI().getLength(), chartData.getMaxLength()); i++) {
                 String dateStr = format.format(chartData.getInputDate()[chartData.getMaxBegIdx() + i]);
 
@@ -290,7 +293,7 @@ public class FileUtils {
             }
             output.write("];\n");
 
-            output.write("CCI = [");
+            output.write("CCI_" + forwardStep + " = [");
             for (int i = 0; i < Math.min(chartData.getCCI().getLength(), chartData.getMaxLength()); i++) {
                 String dateStr = format.format(chartData.getInputDate()[chartData.getMaxBegIdx() + i]);
 
@@ -302,7 +305,7 @@ public class FileUtils {
             }
             output.write("];\n");
 
-            output.write("mfiCciZeroScore = [");
+            output.write("mfiCciZeroScore_" + forwardStep + " = [");
             for (int i = 0; i < Math.min(chartData.getMFICCIZeroScore().getLength(), chartData.getMaxLength()); i++) {
                 String dateStr = format.format(chartData.getInputDate()[chartData.getMaxBegIdx() + i]);
 
@@ -313,7 +316,7 @@ public class FileUtils {
                 }
             }
             output.write("];\n");
-            
+
         } catch (IOException e) {
             e.printStackTrace();
         } finally {

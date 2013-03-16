@@ -1,8 +1,6 @@
 package com.nnstockpredict.data;
 
 import com.nnstockpredict.Config;
-import com.nnstockpredict.MarketEvaluate;
-import com.nnstockpredict.MarketTrain;
 import com.nnstockpredict.Utility.CandlestickUtility;
 import com.nnstockpredict.Utility.FileUtils;
 import com.nnstockpredict.data.candlestick.CandlestickPattern;
@@ -14,7 +12,6 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.encog.ml.data.MLData;
-import org.encog.ml.data.MLDataPair;
 import org.encog.ml.data.MLDataSet;
 import org.encog.ml.data.basic.BasicMLData;
 import org.encog.ml.data.basic.BasicMLDataSet;
@@ -54,7 +51,7 @@ public class PrepareData {
         this.loader = loader;
         this.dataDir = dataDir;
     }
-    
+
     public double getDirection(double value) {
         if (value > 0.0D) {
             return 1.0D;
@@ -163,20 +160,23 @@ public class PrepareData {
      * @param begin The beginning date.
      * @param end The ending date.
      */
-    public void load(String symbol, final Date begin, final Date end) {
-        loadSymbolData(new TickerSymbol(symbol), begin, end);
+    public void load(String symbol, final Date begin, final Date end, final int forwardStep, final int stepSize) {
+        prepare(new TickerSymbol(symbol, "AMEX"), begin, end, forwardStep, stepSize);
     }
 
     /**
-     * Load one ticker symbol.
+     * Prepare data for one ticker symbol.
      *
      * @param ticker The ticker symbol to load.
      * @param from Load data from this date.
      * @param to Load data to this date.
+     * @param forwardStep Number of time steps forward into time to predict
      */
-    private void loadSymbolData(TickerSymbol ticker, final Date from, final Date to) {
+    private void prepare(TickerSymbol ticker, final Date from, final Date to, int forwardStep, int stepSize) {
         final Collection<LoadedMarketData> data = loader.load(ticker,
                 null, from, to);
+
+        System.out.println("Loaded data set: " + data.size());
 
         double[] inputHigh = new double[data.size()];
         double[] inputLow = new double[data.size()];
@@ -185,7 +185,7 @@ public class PrepareData {
         double[] inputClose = new double[data.size()];
         double[] direction = new double[data.size()];
 
-        Date[] inputDate = new Date[data.size() + 1]; // +1 for next day prediction
+        Date[] inputDate = new Date[data.size() + forwardStep];
 
         int i = 0;
         for (final LoadedMarketData item : data) {
@@ -193,7 +193,6 @@ public class PrepareData {
             inputLow[i] = item.getData(MarketDataType.LOW);
             inputVolume[i] = item.getData(MarketDataType.VOLUME);
             inputOpen[i] = item.getData(MarketDataType.OPEN);
-            //inputClose[i] = item.getData(MarketDataType.ADJUSTED_CLOSE);
             inputClose[i] = item.getData(MarketDataType.CLOSE);
             inputDate[i] = item.getWhen();
 
@@ -213,35 +212,41 @@ public class PrepareData {
             i++;
         }
 
-        // Add the next day into the date array
-        Calendar c = Calendar.getInstance();
-        c.setTime(inputDate[inputDate.length - 2]);
-        c.add(Calendar.DATE, 1);
-        inputDate[inputDate.length - 1] = c.getTime();
+        // Calculate all the forward step dates and store them
+        for (int j = 1; j <= forwardStep; j++) {
+            // Add the next time step into the date array
+            Calendar c = Calendar.getInstance();
+            // We want this calendar at the last non-predicted data point
+            c.setTime(inputDate[data.size() - 1]);
+            // Move forward by the time step
+            c.add(stepSize, j);
+            // Store the date
+            inputDate[(data.size() - 1) + j] = c.getTime();
+        }
 
         List<StockIndicator> stockIndicatorList = new ArrayList<StockIndicator>(10);
-/*
-        OpenPrice openPrice = new OpenPrice("Open Price", inputOpen.length);
-        //openPrice.setUseAsInput(true);
-        openPrice.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
-        stockIndicatorList.add(openPrice);
+        /*
+         OpenPrice openPrice = new OpenPrice("Open Price", inputOpen.length);
+         //openPrice.setUseAsInput(true);
+         openPrice.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
+         stockIndicatorList.add(openPrice);
 
-        HighPrice highPrice = new HighPrice("High Price", inputHigh.length);
-        //highPrice.setUseAsInput(true);
-        highPrice.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
-        stockIndicatorList.add(highPrice);
+         HighPrice highPrice = new HighPrice("High Price", inputHigh.length);
+         //highPrice.setUseAsInput(true);
+         highPrice.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
+         stockIndicatorList.add(highPrice);
 
-        LowPrice lowPrice = new LowPrice("Low Price", inputLow.length);
-        //lowPrice.setUseAsInput(true);
-        lowPrice.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
-        stockIndicatorList.add(lowPrice);
+         LowPrice lowPrice = new LowPrice("Low Price", inputLow.length);
+         //lowPrice.setUseAsInput(true);
+         lowPrice.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
+         stockIndicatorList.add(lowPrice);
 
-        ClosePrice closePrice = new ClosePrice("Close Price", inputClose.length);
-        //closePrice.setUseAsInput(true);
-        closePrice.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
-        stockIndicatorList.add(closePrice);*/
-
-      /*    RSI rsi = new RSI("RSI", inputClose.length);
+         ClosePrice closePrice = new ClosePrice("Close Price", inputClose.length);
+         closePrice.setUseAsInput(true);
+         closePrice.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
+         stockIndicatorList.add(closePrice);
+         */
+        /*    RSI rsi = new RSI("RSI", inputClose.length);
          rsi.setUseAsInput(true);
          rsi.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
          stockIndicatorList.add(rsi);
@@ -250,7 +255,7 @@ public class PrepareData {
          stoch.setUseAsInput(true);
          stoch.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
          stockIndicatorList.add(stoch);*/
-/*
+        /*
          StochF stochF = new StochF("Stoch %K", inputClose.length);
          stochF.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
          stockIndicatorList.add(stochF);
@@ -259,9 +264,9 @@ public class PrepareData {
         //williamsR.setUseAsInput(true);
         williamsR.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
         stockIndicatorList.add(williamsR);
-/*
-              EMA5 ema5 = new EMA5("EMA 5", inputClose.length);
-              ema5.setUseAsInput(true);
+        /*
+         EMA5 ema5 = new EMA5("EMA 5", inputClose.length);
+         ema5.setUseAsInput(true);
          ema5.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
          stockIndicatorList.add(ema5);
 
@@ -269,7 +274,7 @@ public class PrepareData {
          ema10.setUseAsInput(true);
          ema10.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
          stockIndicatorList.add(ema10);*/
-/*
+        /*
          EMA30 ema30 = new EMA30("EMA 30", inputClose.length);
          ema30.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
          stockIndicatorList.add(ema30);
@@ -286,7 +291,8 @@ public class PrepareData {
 
 
         CCI cci = new CCI("CCI", inputClose.length);
-        cci.setUseAsInput(true);
+        //RESTORE
+        //cci.setUseAsInput(true);
         cci.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
         stockIndicatorList.add(cci);
 
@@ -295,7 +301,7 @@ public class PrepareData {
          * inputLow, inputVolume, inputOpen, inputClose);
          * stockIndicatorList.add(ad);
          */
-/*        
+        /*
          MFI mfi = new MFI("MFI", inputClose.length);
          mfi.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
          stockIndicatorList.add(mfi);
@@ -311,10 +317,11 @@ public class PrepareData {
 
 
         MFI mfi = new MFI("MFI", inputClose.length);
-        mfi.setUseAsInput(true);
+        //RESTORE
+        //mfi.setUseAsInput(true);
         mfi.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
         stockIndicatorList.add(mfi);
-                
+
         /*
          ADX adx = new ADX("ADX", inputClose.length);
          adx.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
@@ -331,7 +338,7 @@ public class PrepareData {
          */
         MACD macd = new MACD("MACD", inputClose.length);
         macd.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
-     //   macd.setUseAsInput(true);
+        //   macd.setUseAsInput(true);
         stockIndicatorList.add(macd);
 
 
@@ -346,9 +353,9 @@ public class PrepareData {
 
         int maxLength = inputClose.length - maxBegIdx;
 
-        double[] forecast = new double[maxLength + 1]; // +1 for the next prediction
-        double[] forecastError = new double[maxLength];
-        double[] forecastDirectionError = new double[maxLength];
+        double[] forecast = new double[maxLength + forwardStep];
+        double[] forecastError = new double[maxLength + forwardStep];
+        double[] forecastDirectionError = new double[maxLength + forwardStep];
 
         double[] inputC0BodyColour = new double[maxLength];
         double[] inputC0Body = new double[maxLength];
@@ -358,7 +365,7 @@ public class PrepareData {
         double[] inputC0CloseStyle = new double[maxLength];
 
         double[] outputVariation = new double[maxLength];
-       
+
         // Put all scoring indicators last
         WilliamsRScore williamsRScore = new WilliamsRScore("Williams R Score", maxLength);
         williamsRScore.calculate(williamsR.getValues(), williamsR.getBegIdx(), maxBegIdx, maxLength);
@@ -370,10 +377,10 @@ public class PrepareData {
          adxTrendScore.setUseAsInput(true);
          stockIndicatorList.add(adxTrendScore);
          */
-        
+
         MACDPeak macdPeak = new MACDPeak("MACD Peak", maxLength);
         macdPeak.calculate(inputClose, macd.getValues(), macd.getBegIdx(), maxBegIdx, maxLength);
-//        macdPeak.setUseAsInput(true);
+        macdPeak.setUseAsInput(true);
         stockIndicatorList.add(macdPeak);
 
         MACDPeakScore macdPeakScore = new MACDPeakScore("MACD Peak Score", maxLength);
@@ -385,13 +392,13 @@ public class PrepareData {
         macdZeroScore.calculate(macd.getValues(), macd.getBegIdx(), maxBegIdx, maxLength);
         macdZeroScore.setUseAsInput(true);
         stockIndicatorList.add(macdZeroScore);
-               
-        MFICCIZeroScore mfiCciZeroScore = new MFICCIZeroScore("MFI CCI Zero Score", maxLength);
-        mfiCciZeroScore.setUseAsInput(true);
-        mfiCciZeroScore.calculate(mfi.getValues(), mfi.getBegIdx(), cci.getValues(), cci.getBegIdx(), maxBegIdx, maxLength);
-        stockIndicatorList.add(mfiCciZeroScore);       
 
-        
+        MFICCIZeroScore mfiCciZeroScore = new MFICCIZeroScore("MFI CCI Zero Score", maxLength);
+        mfiCciZeroScore.calculate(mfi.getValues(), mfi.getBegIdx(), cci.getValues(), cci.getBegIdx(), maxBegIdx, maxLength);
+        mfiCciZeroScore.setUseAsInput(true);
+        stockIndicatorList.add(mfiCciZeroScore);
+
+
         /* ERSTrendScore ersTrendScore = new ERSTrendScore("ERS Trend Score", maxLength);
          ersTrendScore.calculate(ema5.getValues(), ema5.getBegIdx(), ema10.getValues(), ema10.getBegIdx(), rsi.getValues(), rsi.getBegIdx(), stochF.getValues(), stochF.getBegIdx(), stoch.getValues(), stoch.getBegIdx(), maxBegIdx, maxLength);
          ersTrendScore.setUseAsInput(true);
@@ -436,10 +443,10 @@ public class PrepareData {
         double minD = 9999.0D;
         int varLookBack = 120; // Look back n days
         for (int j = (maxBegIdx + maxLength) - varLookBack; j < maxBegIdx + maxLength; j++) {
-            if (j + 1 < maxBegIdx + maxLength) {
+            if (j + forwardStep < maxBegIdx + maxLength) {
 
                 // Calculate variation of percentage
-                double varPct = ((inputClose[j + 1] - inputClose[j]) / inputClose[j]) * 100.0D;
+                double varPct = ((inputClose[j + forwardStep] - inputClose[j]) / inputClose[j]) * 100.0D;
 
                 //System.out.println("varPct: " + varPct + ", inputClose[j]=" + inputClose[j] + ", inputClose[j+1]=" + inputClose[j+1]);
                 minD = Math.min(varPct, minD);
@@ -701,9 +708,9 @@ public class PrepareData {
             //fuzzyEngine.reset();
 
 
-            if (j + 1 < maxBegIdx + maxLength) {
+            if (j + forwardStep < maxBegIdx + maxLength) {
                 // Calculate variation of percentage
-                double varPct = ((inputClose[j + 1] - inputClose[j]) / inputClose[j]) * 100.0D;
+                double varPct = ((inputClose[j + forwardStep] - inputClose[j]) / inputClose[j]) * 100.0D;
                 //System.out.println("variation percentage = " + varPct + "%");
                 variation.setInputValue(varPct);
             }
@@ -973,58 +980,12 @@ public class PrepareData {
 
             inputIndicatorsUsed += 6;
 
-
             String inputStr;
             inputStr = String.format("NN Original Data [" + j + "]: [%.2f, %.2f, %.2f, %.2f, %.2f, %.2f] -> [%.5f]", inputO[j][0], inputO[j][1], inputO[j][2], inputO[j][3], inputO[j][4], inputO[j][5], idealO[j][0]);
             System.out.println(inputStr);
             inputStr = String.format("NN Normalized Data [" + j + "]: [%.2f, %.2f, %.2f, %.2f, %.2f, %.2f] -> [%.5f]", input[j][0], input[j][1], input[j][2], input[j][3], input[j][4], input[j][5], ideal[j][0]);
             System.out.println(inputStr);
-
-
-
-            //ideal[j][0] = direction[maxBegIdx + j];
-
-            //System.out.println("direction[" + (maxBegIdx + j) + "]=" + direction[maxBegIdx + j]);
         }
-
-        // Sort and separate training and evaluation data
-        ArrayList<DataWindow> upList = new ArrayList<DataWindow>(maxLength);
-        ArrayList<DataWindow> downList = new ArrayList<DataWindow>(maxLength);
-
-        /*
-         int days = 4;
-         for (int j = 0; j < maxLength - (days - 1); j++) {
-
-         BasicMLData[] windowArray = new BasicMLData[days];
-
-         double d = 0.0;
-
-         windowArray[0] = new BasicMLData(Arrays.copyOf(input[j], input[j].length));
-
-         for (int k = 1; k <= (days - 1); k++) {
-         windowArray[k] = new BasicMLData(Arrays.copyOf(input[j + k], input[j + k].length));
-         d = ideal[j + k][0];
-         }
-
-         // Set data window
-         DataWindow dataWindow = new DataWindow(windowArray);
-         // Set direction for window
-         dataWindow.setDirection(d);
-
-         if (d == 1.0) {
-         upList.add(dataWindow);
-         } else {
-         downList.add(dataWindow);
-         }
-
-
-         System.out.println("Day #" + (j + 1) + ": " + dataWindow + ", direction = " + d);
-         }*/
-
-
-
-
-
 
         // Create training data set
         trainingSet = new BasicMLDataSet();
@@ -1033,16 +994,7 @@ public class PrepareData {
         evaluationSet = new BasicMLDataSet();
 
 
-        // Prepare inputs
-/*
-         input[j][0] = inputC0BodyColourNorm[j];
-         input[j][1] = inputC0BodyNorm[j];
-         input[j][2] = inputC0UpperShadowNorm[j];
-         input[j][3] = inputC0LowerShadowNorm[j];
-         input[j][4] = inputC0OpenStyleNorm[j];
-         input[j][5] = inputC0CloseStyleNorm[j];
-         ideal[j][0] = outputVariationNorm[j];
-         */
+        // Spread the data set, 50-50 between training and evaluation
         for (int j = 0; j < maxLength / 2; j++) {
             trainingSet.add(new BasicMLData(input[j]), new BasicMLData(ideal[j]));
         }
@@ -1053,49 +1005,6 @@ public class PrepareData {
 
         // Randomly distribute up's and down's (this makes training/evaluation fair)
         Random random = new Random(System.currentTimeMillis());
-
-        /*
-         int j1 = 0;
-         int j2 = 0;
-         int w = 0;
-
-         while ((upList.size() > 0) || (downList.size() > 0)) {
-
-         if (upList.size() > 0) {
-         j1 = random.nextInt(upList.size());
-         }
-
-         if (downList.size() > 0) {
-         j2 = random.nextInt(downList.size());
-         }
-
-         w = (w == 1) ? 0 : 1;
-
-         if (w == 0) {
-         if (upList.size() > 0) {
-         DataWindow dataWindow = upList.remove(j1);
-         trainingSet.add(new BasicMLDataPair(dataWindow.getData(), new BasicMLData(dataWindow.getDirectionArray())));
-         }
-
-         if (downList.size() > 0) {
-         DataWindow dataWindow = downList.remove(j2);
-         trainingSet.add(new BasicMLDataPair(dataWindow.getData(), new BasicMLData(dataWindow.getDirectionArray())));
-
-         }
-         } else {
-         if (upList.size() > 0) {
-         DataWindow dataWindow = upList.remove(j1);
-         evaluationSet.add(new BasicMLDataPair(dataWindow.getData(), new BasicMLData(dataWindow.getDirectionArray())));
-
-         }
-
-         if (downList.size() > 0) {
-         DataWindow dataWindow = downList.remove(j2);
-         evaluationSet.add(new BasicMLDataPair(dataWindow.getData(), new BasicMLData(dataWindow.getDirectionArray())));
-
-         }
-         }
-         }*/
 
         System.out.println("Training Set Size: " + trainingSet.size());
         System.out.println("Evaluation Set Size: " + evaluationSet.size());
@@ -1118,12 +1027,6 @@ public class PrepareData {
 
         // Train the network
         trainNetwork(network, trainingSet, false);
-
-        // Test the training set
-//        test(trainingSet, network);
-        // Test the evaluation set
-        //test(evaluationSet, network);
-
 
         DecimalFormat format = new DecimalFormat("#0.0000");
         int count = 0;
@@ -1156,95 +1059,41 @@ public class PrepareData {
             name = (String) objArray[0];
             value = (Double) objArray[1];
 
-            forecast[j + 1] = inputClose[j + maxBegIdx] + inputClose[j + maxBegIdx] * (value / 100.D);
+            forecast[j + forwardStep] = inputClose[j + maxBegIdx] + inputClose[j + maxBegIdx] * (value / 100.D);
 
             System.out.println("variation: " + value + "%");
-            String str = String.format("[%.2f] -> [%.2f]", inputClose[j + maxBegIdx], forecast[j + 1]);
+            String str = String.format("[%.2f] -> [%.2f]", inputClose[j + maxBegIdx], forecast[j + forwardStep]);
             System.out.println(str);
 
 
-            if (j < maxLength - 1) {
+            if (j < maxLength - forwardStep) {
                 n++;
-                forecastError[j + 1] = Math.abs(inputClose[j + 1 + maxBegIdx] - forecast[j + 1]);
-                mse += Math.pow(forecastError[j + 1], 2);
-                                
-                System.out.println(String.format("DIRECTION COMPARE: inputClose [%.2f], direction [%.2f] ? forecast [%.2f], direction [%.2f]", inputClose[j + 1 + maxBegIdx], getDirection(inputClose[j + 1 + maxBegIdx]-inputClose[j + maxBegIdx]), forecast[j + 1], getDirection(forecast[j + 1]-inputClose[j + maxBegIdx])));
+                forecastError[j + forwardStep] = Math.abs(inputClose[j + forwardStep + maxBegIdx] - forecast[j + forwardStep]);
+                mse += Math.pow(forecastError[j + forwardStep], 2);
 
-                forecastDirectionError[j + 1] = (getDirection(inputClose[j + 1 + maxBegIdx]-inputClose[j + maxBegIdx]) == getDirection(forecast[j + 1]-inputClose[j + maxBegIdx])) ? 0 : 1;
-                directionalMse += Math.pow(forecastDirectionError[j + 1], 2);
+                System.out.println(String.format("DIRECTION COMPARE: inputClose [%.2f], direction [%.2f] ? forecast [%.2f], direction [%.2f]", inputClose[j + forwardStep + maxBegIdx], getDirection(inputClose[j + forwardStep + maxBegIdx] - inputClose[j + maxBegIdx]), forecast[j + forwardStep], getDirection(forecast[j + forwardStep] - inputClose[j + maxBegIdx])));
+
+                forecastDirectionError[j + forwardStep] = (getDirection(inputClose[j + forwardStep + maxBegIdx] - inputClose[j + maxBegIdx]) == getDirection(forecast[j + forwardStep] - inputClose[j + maxBegIdx])) ? 0 : 1;
+                directionalMse += Math.pow(forecastDirectionError[j + forwardStep], 2);
             }
         }
 
         mse = mse / n;
         directionalMse = directionalMse / n;
-        
 
+        // Write chart data to file
         ChartData chartData = new ChartData(ticker.getSymbol(), inputDate, inputOpen, inputHigh, inputLow, inputClose, forecast, forecastError, forecastDirectionError, maxBegIdx, maxLength, macd, macdPeak, macdPeakScore, macdZeroScore, mfi, cci, mfiCciZeroScore);
-        FileUtils.writeChartData(chartData);
+        FileUtils.writeChartData(chartData, forwardStep);
 
-                
         System.out.println("Commodity: " + ticker.getSymbol());
         System.out.println("MSE: " + mse + ", Directional MSE: " + directionalMse);
-        
 
         for (int j = 0; j < forecastDirectionError.length; j++) {
             if (forecastDirectionError[j] == 0) {
                 correct++;
             }
         }
-        
-        System.out.println("Correct Predictions: " + correct + " (out of a total " + forecastDirectionError.length + " predictions), Predictive correctness: " + (((double)correct/(double)forecastDirectionError.length)*100.0D) + "%");
-        
-        
 
-        /*
-         double threshold = 0.05D;
-         // if (diff < threshold) {
-         if ((actual >= 0) == (predict >= 0)) {
-         correct++;
-         }
-
-         count++;
-
-         String inputStr = String.format("[%.2f, %.2f, %.2f, %.2f, %.2f, %.2f]", input.getData()[0], input.getData()[1], input.getData()[2], input.getData()[3], input.getData()[4], input.getData()[5]);
-
-         System.out.println("Day " + count + ": inputStr=" + inputStr + ", actual="
-         + format.format(actual)
-         + ", predict=" + format.format(predict) + ", diff=" + diff);
-
-
-         System.out.println("Test Set Summary:");
-         double percent = (double) correct / (double) count;
-         System.out.println("Correct predictions:" + correct + "/" + count);
-         System.out.println("Prediction Accuracy:"
-         + format.format(percent * 100) + "%");
-         */
-
-        // Test and predict for tomorrow
-        /*
-         MLData input = pair.getInput();
-         MLData actualData = pair.getIdeal();
-         MLData predictData = network.compute(input);
-
-         // forecast[i+1] = close[i] + close[i](c/100);
-
-         double actual = actualData.getData(0);
-         double predict = predictData.getData(0);
-         double diff = Math.abs(predict - actual);
-
-         Direction actualDirection = determineDirection(actual);
-         Direction predictDirection = determineDirection(predict);
-
-         if (actualDirection == predictDirection) {
-         correct++;
-         }
-
-         count++;
-
-         System.out.println("Day " + count + ":actual="
-         + format.format(actual) + "(" + actualDirection + ")"
-         + ",predict=" + format.format(predict) + "("
-         + predictDirection + ")" + ",diff=" + diff);*/
-
+        System.out.println("Correct Predictions: " + correct + " (out of a total " + forecastDirectionError.length + " predictions), Predictive correctness: " + (((double) correct / (double) forecastDirectionError.length) * 100.0D) + "%");
     }
 }
