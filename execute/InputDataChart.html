@@ -20,7 +20,7 @@
       
 <!-- Example scripts go here -->
 
-<div id="controller_chart" style="margin:20px;height:240px; width:100%;"></div>
+<div id="controller_chart" style="margin:20px;height:100px; width:100%;"></div>
 <div id="price_chart" style="margin:20px;height:240px; width:100%;"></div>
 <div id="forecast_chart" style="margin:20px;height:240px; width:100%;"></div>
 <div id="forecastError_chart" style="margin:20px;height:240px; width:100%;"></div>
@@ -28,15 +28,23 @@
 <div id="macd_chart" style="margin:20px;height:240px; width:100%;"></div>
 <div id="macd_zero_chart" style="margin:20px;height:240px; width:100%;"></div>
 <div id="macd_peak_chart" style="margin:20px;height:240px; width:100%;"></div>
+<div id="macd_peak_score_chart" style="margin:20px;height:240px; width:100%;"></div>
 <div id="mfi_chart" style="margin:20px;height:240px; width:100%;"></div>
 <div id="cci_chart" style="margin:20px;height:240px; width:100%;"></div>
+<div id="mfi_cci_zero_chart" style="margin:20px;height:240px; width:100%;"></div>
 
 <script type="text/javascript">$(document).ready(function(){
     $.jqplot.config.enablePlugins = true;
-    
+        
     controller_plot = $.jqplot('controller_chart',[ohlc],{
       title: name,
-      axesDefaults:{},
+      axesDefaults: {               
+          useSeriesColor:true, 
+          rendererOptions: {
+            alignTicks: true
+          } 
+        },
+
       axes: {
           xaxis: {
               renderer:$.jqplot.DateAxisRenderer
@@ -48,10 +56,10 @@
       series: [{renderer:$.jqplot.OHLCRenderer, rendererOptions:{candleStick:true,fillUpBody:true,upBodyColor:'#00E000',downBodyColor:'#FF0000'}}],
       
       cursor:{
+          show: true,
+          showTooltip: false,
           zoom:true,
-          constrainZoomTo: 'x',
-          tooltipOffset: 10,
-          tooltipLocation: 'nw'
+          constrainZoomTo: 'x'
       },
       highlighter: {
           showMarker:false,
@@ -107,7 +115,7 @@
               renderer:$.jqplot.DateAxisRenderer
           },
           yaxis: {
-              tickOptions:{ formatString: "%#.2f" }
+              tickOptions:{ prefix: '', formatString: "%.2f"}
           }
       },
 
@@ -139,7 +147,7 @@
               renderer:$.jqplot.DateAxisRenderer
           },
           yaxis: {
-              tickOptions:{ prefix: '' }
+              tickOptions:{ prefix: '', formatString: "%.2f"}
           }
       },
 
@@ -163,15 +171,15 @@
       }
     });
     
-    plot4 = $.jqplot('macd_peak_chart',[macdPeakScore],{
+    plot4a = $.jqplot('macd_peak_chart',[macdPeak],{
       title: 'MACD Peak Chart',
       axesDefaults:{},
       axes: {
           xaxis: {
-              renderer:$.jqplot.DateAxisRenderer
+              renderer:$.jqplot.DateAxisRenderer              
           },
           yaxis: {
-              tickOptions:{ prefix: '' }
+              tickOptions:{ prefix: '', formatString: "%.2f"}
           }
       },
 
@@ -190,7 +198,39 @@
           yvalues: 4,
           formatString:'<table class="jqplot-highlighter"> \
           <tr><td>Date:</td><td>%s</td></tr> \
-          <tr><td>Value:</td><td>%s</td></tr> \
+          <tr><td>Value:</td><td>%.2f</td></tr> \
+          </table>'
+      }
+    });
+    
+    plot4b = $.jqplot('macd_peak_score_chart',[macdPeakScore],{
+      title: 'MACD Peak Score Chart',
+      axesDefaults:{},
+      axes: {
+          xaxis: {
+              renderer:$.jqplot.DateAxisRenderer              
+          },
+          yaxis: {
+              tickOptions:{ prefix: '', formatString: "%.2f"}
+          }
+      },
+
+      series:[{lineWidth:2, color: '#1D9F4F', markerOptions: {show: false}}],
+      
+      
+      cursor:{
+          zoom:true,
+          constrainZoomTo: 'x',
+          tooltipOffset: 10,
+          tooltipLocation: 'nw'
+      },
+      highlighter: {
+          showMarker:false,
+          tooltipAxes: 'xy',
+          yvalues: 4,
+          formatString:'<table class="jqplot-highlighter"> \
+          <tr><td>Date:</td><td>%s</td></tr> \
+          <tr><td>Value:</td><td>%.2f</td></tr> \
           </table>'
       }
     });
@@ -203,7 +243,7 @@
               renderer:$.jqplot.DateAxisRenderer
           },
           yaxis: {
-              tickOptions:{ prefix: '' }
+              tickOptions:{ prefix: '', formatString: "%.2f"}
           }
       },
 
@@ -243,7 +283,7 @@
               renderer:$.jqplot.DateAxisRenderer
           },
           yaxis: {
-              tickOptions:{ prefix: '' }
+              tickOptions:{ prefix: '', formatString: "%.2f"}
           }
       },
 
@@ -275,7 +315,7 @@
               renderer:$.jqplot.DateAxisRenderer
           },
           yaxis: {
-              tickOptions:{ prefix: '' }
+              tickOptions:{ prefix: '', formatString: "%.2f"}
           }
       },
 
@@ -294,7 +334,7 @@
           yvalues: 4,
           formatString:'<table class="jqplot-highlighter"> \
           <tr><td>Date:</td><td>%s</td></tr> \
-          <tr><td>Value:</td><td>%s</td></tr> \
+          <tr><td>Value:</td><td>%d</td></tr> \
           </table>'
       }
     });
@@ -307,7 +347,7 @@
               renderer:$.jqplot.DateAxisRenderer
           },
           yaxis: {
-              tickOptions:{ prefix: '' }
+              tickOptions:{ prefix: '', formatString: "%.2f"}
           }
       },
 
@@ -338,7 +378,7 @@
               renderer:$.jqplot.DateAxisRenderer
           },
           yaxis: {
-              tickOptions:{ prefix: '' }
+              tickOptions:{ prefix: '', formatString: "%.2f"}
           }
       },
 
@@ -362,15 +402,50 @@
       }
     });
 
+    plot10 = $.jqplot('mfi_cci_zero_chart',[mfiCciZeroScore],{
+      title: 'MFI CCI Score Chart',
+      axesDefaults:{},
+      axes: {
+          xaxis: {
+              renderer:$.jqplot.DateAxisRenderer
+          },
+          yaxis: {                          
+              tickOptions:{ prefix: '', formatString: "%.2f"}
+          }
+      },
+
+      series:[{lineWidth:2, color: '#33A7A6', markerOptions: {show: false}}],
+      
+      
+      cursor:{
+          zoom:true,
+          constrainZoomTo: 'x',
+          tooltipOffset: 10,
+          tooltipLocation: 'nw'
+      },
+      highlighter: {
+          showMarker:false,
+          tooltipAxes: 'xy',
+          yvalues: 4,
+          formatString:'<table class="jqplot-highlighter"> \
+          <tr><td>Date:</td><td>%s</td></tr> \
+          <tr><td>Value:</td><td>%s</td></tr> \
+          </table>'
+      }
+    });
+
+
 $.jqplot.Cursor.zoomProxy(plot1, controller_plot);
 $.jqplot.Cursor.zoomProxy(plot2, controller_plot);
 $.jqplot.Cursor.zoomProxy(plot3, controller_plot);
-$.jqplot.Cursor.zoomProxy(plot4, controller_plot);
+$.jqplot.Cursor.zoomProxy(plot4a, controller_plot);
+$.jqplot.Cursor.zoomProxy(plot4b, controller_plot);
 //$.jqplot.Cursor.zoomProxy(plot5, controller_plot);
 $.jqplot.Cursor.zoomProxy(plot6, controller_plot);
 $.jqplot.Cursor.zoomProxy(plot7, controller_plot);
 $.jqplot.Cursor.zoomProxy(plot8, controller_plot);
 $.jqplot.Cursor.zoomProxy(plot9, controller_plot);
+$.jqplot.Cursor.zoomProxy(plot10, controller_plot);
 
 
 });

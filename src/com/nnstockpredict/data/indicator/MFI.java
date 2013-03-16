@@ -26,6 +26,6 @@ public class MFI extends StockIndicator {
         Core core = new Core();
 
         // Calculate MFI
-        checkRange(core.mfi(0, inputClose.length - 1, inputHigh, inputLow, inputClose, inputVolume, 14, begIdx, length, value));
+        checkRange(core.mfi(0, inputClose.length - 1, inputHigh, inputLow, inputClose, inputVolume, 18, begIdx, length, value));
     }
 }

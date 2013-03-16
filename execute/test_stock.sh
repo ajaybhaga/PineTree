@@ -1,2 +1,2 @@
 #!/bin/bash
-./generate.sh $1 | grep MSE > $1_MSE.output
+./generate.sh $1 | tail -3  >> summary.output

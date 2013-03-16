@@ -2,9 +2,11 @@ package com.nnstockpredict.data;
 
 import com.nnstockpredict.data.indicator.CCI;
 import com.nnstockpredict.data.indicator.MACD;
+import com.nnstockpredict.data.indicator.MACDPeak;
 import com.nnstockpredict.data.indicator.MACDPeakScore;
 import com.nnstockpredict.data.indicator.MACDZeroScore;
 import com.nnstockpredict.data.indicator.MFI;
+import com.nnstockpredict.data.indicator.MFICCIZeroScore;
 import java.util.Date;
 
 /**
@@ -24,13 +26,15 @@ public class ChartData {
     private double[] forecastDirectionError;
     private int maxBegIdx;
     private int maxLength;
-    private MACD macd;
+    private MACD macd;    
+    private MACDPeak macdPeak;
     private MACDPeakScore macdPeakScore;
     private MACDZeroScore macdZeroScore;
     private MFI mfi;
     private CCI cci;
+    private MFICCIZeroScore mfiCciZeroScore;
 
-    public ChartData(String name, Date[] inputDate, double[] inputOpen, double[] inputHigh, double[] inputLow, double[] inputClose, double[] forecast, double[] forecastError, double[] forecastDirectionError, int maxBegIdx, int maxLength, MACD macd, MACDPeakScore macdPeakScore, MACDZeroScore macdZeroScore, MFI mfi, CCI cci) {
+    public ChartData(String name, Date[] inputDate, double[] inputOpen, double[] inputHigh, double[] inputLow, double[] inputClose, double[] forecast, double[] forecastError, double[] forecastDirectionError, int maxBegIdx, int maxLength, MACD macd, MACDPeak macdPeak, MACDPeakScore macdPeakScore, MACDZeroScore macdZeroScore, MFI mfi, CCI cci, MFICCIZeroScore mfiCciZeroScore) {
         this.name = name;
         this.inputDate = inputDate;
         this.inputOpen = inputOpen;
@@ -43,10 +47,12 @@ public class ChartData {
         this.maxBegIdx = maxBegIdx;
         this.maxLength = maxLength;
         this.macd = macd;
+        this.macdPeak = macdPeak;
         this.macdPeakScore = macdPeakScore;
         this.macdZeroScore = macdZeroScore;
         this.mfi = mfi;
         this.cci = cci;
+        this.mfiCciZeroScore = mfiCciZeroScore;
     }
 
     public String getName() {
@@ -97,6 +103,10 @@ public class ChartData {
         return macd;
     }
 
+    public MACDPeak getMACDPeak() {
+        return macdPeak;
+    }
+
     public MACDPeakScore getMACDPeakScore() {
         return macdPeakScore;
     }
@@ -111,5 +121,9 @@ public class ChartData {
 
     public CCI getCCI() {
         return cci;
+    }
+
+    public MFICCIZeroScore getMFICCIZeroScore() {
+        return mfiCciZeroScore;
     }
 }

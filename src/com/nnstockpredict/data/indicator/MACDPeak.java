@@ -1,5 +1,5 @@
 /*
- * MACD Peak Score Indicator
+ * MACD Peak Indicator
  */
 /*
  * Author:  Ajay Bhaga
@@ -10,13 +10,13 @@ import com.nnstockpredict.Utility.PeakFinder;
 import com.nnstockpredict.Utility.Response;
 import java.util.List;
 
-public class MACDPeakScore extends StockIndicator {
+public class MACDPeak extends StockIndicator {
 
     private final double UP_TREND = 1.0;
     private final double CONSOLIDATING_TREND = 0.0;
     private final double DOWN_TREND = -1.0;
 
-    public MACDPeakScore(String name, int size) {
+    public MACDPeak(String name, int size) {
         super(name, size);
     }
 
@@ -186,7 +186,6 @@ public class MACDPeakScore extends StockIndicator {
 
         System.out.println("MACDPeak: maxLength {" + maxLength + "}, response.getIndexArray().length {" + response.getIndexArray().length + "}, response.getValueArray().length {" + response.getValueArray().length + "}");
         // Instantiate new values (this will store the score)
-        double[] peakValue = new double[maxLength];
         value = new double[maxLength];
 
         for (int i = 0; i < response.getIndexArray().length; i++) {
@@ -194,24 +193,7 @@ public class MACDPeakScore extends StockIndicator {
             //System.out.println("Peak Find: Value[" + i + "] = " + response.getValueArray()[i]);
 
             if (response.getIndexArray()[i] < maxLength) {
-                peakValue[response.getIndexArray()[i]] = Math.abs(response.getValueArray()[i]);
-            }
-        }
-
-        int lastPeakIdx = 0;
-        double lastPeakValue = peakValue[0];
-        for (int i = 0; i < peakValue.length; i++) {
-
-            // Found next peak
-            if (peakValue[i] > 0.0) {
-                for (int j = lastPeakIdx; j <= i; j++) {
-                    // Score everything until here
-                    value[j] = peakValue[i] - lastPeakValue;
-                }
-
-                // Store the current peak for the next iteration
-                lastPeakIdx = i;
-                lastPeakValue = peakValue[i];
+                value[response.getIndexArray()[i]] = Math.abs(response.getValueArray()[i]);
             }
         }
 

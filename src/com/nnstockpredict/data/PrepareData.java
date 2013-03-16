@@ -314,7 +314,7 @@ public class PrepareData {
         mfi.setUseAsInput(true);
         mfi.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
         stockIndicatorList.add(mfi);
-
+                
         /*
          ADX adx = new ADX("ADX", inputClose.length);
          adx.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
@@ -358,7 +358,7 @@ public class PrepareData {
         double[] inputC0CloseStyle = new double[maxLength];
 
         double[] outputVariation = new double[maxLength];
-
+       
         // Put all scoring indicators last
         WilliamsRScore williamsRScore = new WilliamsRScore("Williams R Score", maxLength);
         williamsRScore.calculate(williamsR.getValues(), williamsR.getBegIdx(), maxBegIdx, maxLength);
@@ -370,6 +370,12 @@ public class PrepareData {
          adxTrendScore.setUseAsInput(true);
          stockIndicatorList.add(adxTrendScore);
          */
+        
+        MACDPeak macdPeak = new MACDPeak("MACD Peak", maxLength);
+        macdPeak.calculate(inputClose, macd.getValues(), macd.getBegIdx(), maxBegIdx, maxLength);
+//        macdPeak.setUseAsInput(true);
+        stockIndicatorList.add(macdPeak);
+
         MACDPeakScore macdPeakScore = new MACDPeakScore("MACD Peak Score", maxLength);
         macdPeakScore.calculate(inputClose, macd.getValues(), macd.getBegIdx(), maxBegIdx, maxLength);
         macdPeakScore.setUseAsInput(true);
@@ -379,7 +385,13 @@ public class PrepareData {
         macdZeroScore.calculate(macd.getValues(), macd.getBegIdx(), maxBegIdx, maxLength);
         macdZeroScore.setUseAsInput(true);
         stockIndicatorList.add(macdZeroScore);
+               
+        MFICCIZeroScore mfiCciZeroScore = new MFICCIZeroScore("MFI CCI Zero Score", maxLength);
+        mfiCciZeroScore.setUseAsInput(true);
+        mfiCciZeroScore.calculate(mfi.getValues(), mfi.getBegIdx(), cci.getValues(), cci.getBegIdx(), maxBegIdx, maxLength);
+        stockIndicatorList.add(mfiCciZeroScore);       
 
+        
         /* ERSTrendScore ersTrendScore = new ERSTrendScore("ERS Trend Score", maxLength);
          ersTrendScore.calculate(ema5.getValues(), ema5.getBegIdx(), ema10.getValues(), ema10.getBegIdx(), rsi.getValues(), rsi.getBegIdx(), stochF.getValues(), stochF.getBegIdx(), stoch.getValues(), stoch.getBegIdx(), maxBegIdx, maxLength);
          ersTrendScore.setUseAsInput(true);
@@ -1167,10 +1179,23 @@ public class PrepareData {
         directionalMse = directionalMse / n;
         
 
-        ChartData chartData = new ChartData(ticker.getSymbol(), inputDate, inputOpen, inputHigh, inputLow, inputClose, forecast, forecastError, forecastDirectionError, maxBegIdx, maxLength, macd, macdPeakScore, macdZeroScore, mfi, cci);
+        ChartData chartData = new ChartData(ticker.getSymbol(), inputDate, inputOpen, inputHigh, inputLow, inputClose, forecast, forecastError, forecastDirectionError, maxBegIdx, maxLength, macd, macdPeak, macdPeakScore, macdZeroScore, mfi, cci, mfiCciZeroScore);
         FileUtils.writeChartData(chartData);
 
+                
+        System.out.println("Commodity: " + ticker.getSymbol());
         System.out.println("MSE: " + mse + ", Directional MSE: " + directionalMse);
+        
+
+        for (int j = 0; j < forecastDirectionError.length; j++) {
+            if (forecastDirectionError[j] == 0) {
+                correct++;
+            }
+        }
+        
+        System.out.println("Correct Predictions: " + correct + " (out of a total " + forecastDirectionError.length + " predictions), Predictive correctness: " + (((double)correct/(double)forecastDirectionError.length)*100.0D) + "%");
+        
+        
 
         /*
          double threshold = 0.05D;
