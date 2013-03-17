@@ -3,6 +3,7 @@ package com.nnstockpredict.data;
 import com.nnstockpredict.Config;
 import com.nnstockpredict.Utility.CandlestickUtility;
 import com.nnstockpredict.Utility.FileUtils;
+import com.nnstockpredict.Utility.loader.EODFinanceLoader;
 import com.nnstockpredict.data.candlestick.CandlestickPattern;
 import com.nnstockpredict.data.indicator.*;
 import com.nnstockpredict.fuzzy.*;
@@ -41,15 +42,17 @@ public class PrepareData {
     /**
      * The loader to use to obtain the data.
      */
-    private final MarketLoader loader;
+    private final EODFinanceLoader loader;
+    private final int stepSize;
     private File dataDir;
     private MLDataSet trainingSet = null;
     private MLDataSet evaluationSet = null;
     private LinguisticVariable variation = null;
 
-    public PrepareData(MarketLoader loader, File dataDir) {
+    public PrepareData(EODFinanceLoader loader, File dataDir, int stepSize) {
         this.loader = loader;
         this.dataDir = dataDir;
+        this.stepSize = stepSize;
     }
 
     public double getDirection(double value) {
@@ -160,8 +163,8 @@ public class PrepareData {
      * @param begin The beginning date.
      * @param end The ending date.
      */
-    public void load(String symbol, final Date begin, final Date end, final int forwardStep, final int stepSize) {
-        prepare(new TickerSymbol(symbol, "AMEX"), begin, end, forwardStep, stepSize);
+    public void load(String symbol, final Date begin, final Date end, final int forwardStep) {
+        prepare(new TickerSymbol(symbol, "AMEX"), begin, end, forwardStep);
     }
 
     /**
@@ -172,9 +175,9 @@ public class PrepareData {
      * @param to Load data to this date.
      * @param forwardStep Number of time steps forward into time to predict
      */
-    private void prepare(TickerSymbol ticker, final Date from, final Date to, int forwardStep, int stepSize) {
+    private void prepare(TickerSymbol ticker, final Date from, final Date to, int forwardStep) {
         final Collection<LoadedMarketData> data = loader.load(ticker,
-                null, from, to);
+                null, from, to, stepSize);
 
         System.out.println("Loaded data set: " + data.size());
 

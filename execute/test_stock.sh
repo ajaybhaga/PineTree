@@ -1,2 +1,4 @@
 #!/bin/bash
-./generate.sh $1 | tail -3  >> summary.output
+./generate.sh $1 >> tmp.output
+echo $1 >> summary.output
+grep 'Correct Predictions' tmp.output >> summary.output

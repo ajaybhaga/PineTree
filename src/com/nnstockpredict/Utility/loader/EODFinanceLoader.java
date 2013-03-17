@@ -268,9 +268,26 @@ public class EODFinanceLoader implements MarketLoader {
     public Collection<LoadedMarketData> load(final TickerSymbol ticker,
             final Set<MarketDataType> dataNeeded, final Date from,
             final Date to) {
-        //try {
+        // Default to day
+        return load(ticker, dataNeeded, from, to, Calendar.DATE);
+    }
 
-        return this.getData(ticker, from, to, Calendar.HOUR_OF_DAY);
+        /**
+     * Load the specified financial data.
+     *
+     * @param ticker The ticker symbol to load.
+     * @param dataNeeded The financial data needed.
+     * @param from The beginning date to load data from.
+     * @param to The ending date to load data to.
+     * @return A collection of LoadedMarketData objects that represent the data
+     * loaded.
+     */
+    public Collection<LoadedMarketData> load(final TickerSymbol ticker,
+            final Set<MarketDataType> dataNeeded, final Date from,
+            final Date to, final int stepSize) {
+           
+    //try {
+        return this.getData(ticker, from, to, stepSize);
 
 //            final Collection<LoadedMarketData> tmpResult =
         //                   new ArrayList<LoadedMarketData>();

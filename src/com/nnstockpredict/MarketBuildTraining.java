@@ -80,24 +80,24 @@ public class MarketBuildTraining {
 
     public static void generate(String symbol, File dataDir) {
 
-        // Retrieve stock data from Yahoo web service
-        final MarketLoader loader = new EODFinanceLoader();        
+        // Retrieve stock data from EOD web service
+        final EODFinanceLoader loader = new EODFinanceLoader();        
 
         Calendar end = new GregorianCalendar();// end today
         Calendar begin = (Calendar) end.clone();
 
         // Gather training data for the last 2 years, stopping 60 days short of today.
         // The 60 days will be used to evaluate prediction.        
-        //begin.add(Calendar.YEAR, -2);
-        //begin.add(Calendar.DATE, -364);
+        begin.add(Calendar.YEAR, -2);
+        begin.add(Calendar.DATE, -364);
         
-        begin.add(Calendar.DATE, -30);
+        //begin.add(Calendar.DATE, -30);
         
 
         // Prepare data inputs
-        PrepareData prepareData = new PrepareData(loader, dataDir);
-        prepareData.load(symbol, begin.getTime(), end.getTime(), 1, Calendar.DATE);
-        prepareData.load(symbol, begin.getTime(), end.getTime(), 2, Calendar.DATE);
-        prepareData.load(symbol, begin.getTime(), end.getTime(), 4, Calendar.DATE);
+        PrepareData prepareData = new PrepareData(loader, dataDir, Calendar.DATE);
+        prepareData.load(symbol, begin.getTime(), end.getTime(), 1);
+        prepareData.load(symbol, begin.getTime(), end.getTime(), 2);
+        prepareData.load(symbol, begin.getTime(), end.getTime(), 4);
     }
 }
