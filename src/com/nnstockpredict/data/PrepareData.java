@@ -1013,9 +1013,9 @@ public class PrepareData {
         System.out.println("Evaluation Set Size: " + evaluationSet.size());
 
         // Write the training data to a file
-        EncogUtility.saveEGB(new File(dataDir, Config.TRAINING_FILE), trainingSet);
+        //EncogUtility.saveEGB(new File(dataDir, Config.TRAINING_FILE), trainingSet);
         // Write the evaluation data to a file
-        EncogUtility.saveEGB(new File(dataDir, Config.EVALUATION_FILE), evaluationSet);
+        //EncogUtility.saveEGB(new File(dataDir, Config.EVALUATION_FILE), evaluationSet);
 
         System.out.println("Training input set size: " + trainingSet.getInputSize());
         System.out.println("Training ideal set size: " + trainingSet.getIdealSize());
@@ -1026,7 +1026,7 @@ public class PrepareData {
         BasicNetwork network = EncogUtility.simpleFeedForward(trainingSet.getInputSize(), Config.HIDDEN1_COUNT, Config.HIDDEN2_COUNT, trainingSet.getIdealSize(), true);
 
         // save the network and the training
-        EncogDirectoryPersistence.saveObject(new File(dataDir, Config.NETWORK_FILE), network);
+        //EncogDirectoryPersistence.saveObject(new File(dataDir, Config.NETWORK_FILE), network);
 
         // Train the network
         trainNetwork(network, trainingSet, false);

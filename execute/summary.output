@@ -1,7 +1,318 @@
-SOXL
-Correct Predictions: 511 (out of a total 734 predictions), Predictive correctness: 69.61852861035422%
-Correct Predictions: 527 (out of a total 735 predictions), Predictive correctness: 71.70068027210884%
-Correct Predictions: 520 (out of a total 737 predictions), Predictive correctness: 70.5563093622795%
-Correct Predictions: 509 (out of a total 734 predictions), Predictive correctness: 69.34604904632153%
+UPW
+Correct Predictions: 533 (out of a total 734 predictions), Predictive correctness: 72.6158038147139%
 Correct Predictions: 536 (out of a total 735 predictions), Predictive correctness: 72.92517006802721%
+Correct Predictions: 541 (out of a total 737 predictions), Predictive correctness: 73.40569877883311%
+XTN
+Correct Predictions: 364 (out of a total 509 predictions), Predictive correctness: 71.51277013752456%
+Correct Predictions: 364 (out of a total 510 predictions), Predictive correctness: 71.37254901960785%
+Correct Predictions: 363 (out of a total 512 predictions), Predictive correctness: 70.8984375%
+RYU
+Correct Predictions: 510 (out of a total 734 predictions), Predictive correctness: 69.48228882833789%
+Correct Predictions: 540 (out of a total 735 predictions), Predictive correctness: 73.46938775510205%
+Correct Predictions: 556 (out of a total 737 predictions), Predictive correctness: 75.44097693351425%
+VPU
+Correct Predictions: 511 (out of a total 734 predictions), Predictive correctness: 69.61852861035422%
+Correct Predictions: 536 (out of a total 735 predictions), Predictive correctness: 72.92517006802721%
+Correct Predictions: 512 (out of a total 737 predictions), Predictive correctness: 69.4708276797829%
+IDU
+Correct Predictions: 504 (out of a total 734 predictions), Predictive correctness: 68.66485013623979%
+Correct Predictions: 556 (out of a total 735 predictions), Predictive correctness: 75.64625850340137%
+Correct Predictions: 535 (out of a total 737 predictions), Predictive correctness: 72.59158751696066%
+PUI
+Correct Predictions: 471 (out of a total 734 predictions), Predictive correctness: 64.16893732970027%
+Correct Predictions: 523 (out of a total 735 predictions), Predictive correctness: 71.156462585034%
+Correct Predictions: 511 (out of a total 737 predictions), Predictive correctness: 69.33514246947082%
+XLU
+Correct Predictions: 518 (out of a total 734 predictions), Predictive correctness: 70.57220708446866%
+Correct Predictions: 533 (out of a total 735 predictions), Predictive correctness: 72.51700680272108%
+Correct Predictions: 527 (out of a total 737 predictions), Predictive correctness: 71.50610583446404%
+FXU
+Correct Predictions: 459 (out of a total 734 predictions), Predictive correctness: 62.53405994550408%
+Correct Predictions: 503 (out of a total 735 predictions), Predictive correctness: 68.43537414965986%
+Correct Predictions: 514 (out of a total 737 predictions), Predictive correctness: 69.74219810040707%
+JXI
+Correct Predictions: 532 (out of a total 734 predictions), Predictive correctness: 72.47956403269755%
+Correct Predictions: 532 (out of a total 735 predictions), Predictive correctness: 72.38095238095238%
 Correct Predictions: 540 (out of a total 737 predictions), Predictive correctness: 73.27001356852104%
+DBU
+Correct Predictions: 518 (out of a total 734 predictions), Predictive correctness: 70.57220708446866%
+Correct Predictions: 537 (out of a total 735 predictions), Predictive correctness: 73.06122448979592%
+Correct Predictions: 556 (out of a total 737 predictions), Predictive correctness: 75.44097693351425%
+XHS
+Correct Predictions: 223 (out of a total 334 predictions), Predictive correctness: 66.76646706586826%
+Correct Predictions: 221 (out of a total 335 predictions), Predictive correctness: 65.97014925373135%
+Correct Predictions: 231 (out of a total 337 predictions), Predictive correctness: 68.5459940652819%
+AXHE
+Correct Predictions: 431 (out of a total 646 predictions), Predictive correctness: 66.71826625386997%
+Correct Predictions: 462 (out of a total 647 predictions), Predictive correctness: 71.4064914992272%
+Correct Predictions: 458 (out of a total 649 predictions), Predictive correctness: 70.57010785824345%
+FXH
+Correct Predictions: 506 (out of a total 734 predictions), Predictive correctness: 68.93732970027247%
+Correct Predictions: 529 (out of a total 735 predictions), Predictive correctness: 71.97278911564626%
+Correct Predictions: 534 (out of a total 737 predictions), Predictive correctness: 72.45590230664858%
+CURE
+Correct Predictions: 296 (out of a total 410 predictions), Predictive correctness: 72.1951219512195%
+Correct Predictions: 300 (out of a total 411 predictions), Predictive correctness: 72.99270072992701%
+Correct Predictions: 321 (out of a total 413 predictions), Predictive correctness: 77.72397094430993%
+RXL
+Correct Predictions: 526 (out of a total 734 predictions), Predictive correctness: 71.66212534059946%
+Correct Predictions: 490 (out of a total 735 predictions), Predictive correctness: 66.66666666666666%
+Correct Predictions: 531 (out of a total 737 predictions), Predictive correctness: 72.04884667571235%
+HGEM
+Correct Predictions: 258 (out of a total 404 predictions), Predictive correctness: 63.86138613861386%
+Correct Predictions: 289 (out of a total 405 predictions), Predictive correctness: 71.35802469135803%
+Correct Predictions: 280 (out of a total 407 predictions), Predictive correctness: 68.7960687960688%
+PJP
+Correct Predictions: 532 (out of a total 734 predictions), Predictive correctness: 72.47956403269755%
+Correct Predictions: 510 (out of a total 735 predictions), Predictive correctness: 69.38775510204081%
+Correct Predictions: 548 (out of a total 737 predictions), Predictive correctness: 74.35549525101763%
+VHT
+Correct Predictions: 504 (out of a total 734 predictions), Predictive correctness: 68.66485013623979%
+Correct Predictions: 530 (out of a total 735 predictions), Predictive correctness: 72.10884353741497%
+Correct Predictions: 542 (out of a total 737 predictions), Predictive correctness: 73.54138398914517%
+IHE
+Correct Predictions: 512 (out of a total 734 predictions), Predictive correctness: 69.75476839237056%
+Correct Predictions: 528 (out of a total 735 predictions), Predictive correctness: 71.83673469387755%
+Correct Predictions: 529 (out of a total 737 predictions), Predictive correctness: 71.77747625508819%
+IBB
+PXE
+Correct Predictions: 514 (out of a total 734 predictions), Predictive correctness: 70.02724795640327%
+Correct Predictions: 556 (out of a total 735 predictions), Predictive correctness: 75.64625850340137%
+Correct Predictions: 542 (out of a total 737 predictions), Predictive correctness: 73.54138398914517%
+UGA
+Correct Predictions: 528 (out of a total 734 predictions), Predictive correctness: 71.93460490463215%
+Correct Predictions: 536 (out of a total 735 predictions), Predictive correctness: 72.92517006802721%
+Correct Predictions: 538 (out of a total 737 predictions), Predictive correctness: 72.99864314789689%
+PXI
+Correct Predictions: 520 (out of a total 734 predictions), Predictive correctness: 70.84468664850137%
+Correct Predictions: 509 (out of a total 735 predictions), Predictive correctness: 69.25170068027211%
+Correct Predictions: 546 (out of a total 737 predictions), Predictive correctness: 74.08412483039348%
+MLPL
+Correct Predictions: 445 (out of a total 655 predictions), Predictive correctness: 67.93893129770993%
+Correct Predictions: 439 (out of a total 656 predictions), Predictive correctness: 66.92073170731707%
+Correct Predictions: 469 (out of a total 658 predictions), Predictive correctness: 71.27659574468085%
+BNO
+Correct Predictions: 489 (out of a total 680 predictions), Predictive correctness: 71.91176470588235%
+Correct Predictions: 490 (out of a total 681 predictions), Predictive correctness: 71.95301027900148%
+Correct Predictions: 496 (out of a total 683 predictions), Predictive correctness: 72.62079062957541%
+CGW
+Correct Predictions: 504 (out of a total 734 predictions), Predictive correctness: 68.66485013623979%
+Correct Predictions: 514 (out of a total 735 predictions), Predictive correctness: 69.93197278911565%
+Correct Predictions: 556 (out of a total 737 predictions), Predictive correctness: 75.44097693351425%
+AMJ
+Correct Predictions: 493 (out of a total 734 predictions), Predictive correctness: 67.16621253405994%
+Correct Predictions: 503 (out of a total 735 predictions), Predictive correctness: 68.43537414965986%
+Correct Predictions: 530 (out of a total 737 predictions), Predictive correctness: 71.91316146540026%
+AMLP
+Correct Predictions: 414 (out of a total 620 predictions), Predictive correctness: 66.77419354838709%
+Correct Predictions: 412 (out of a total 621 predictions), Predictive correctness: 66.34460547504025%
+Correct Predictions: 427 (out of a total 623 predictions), Predictive correctness: 68.53932584269663%
+RYE
+Correct Predictions: 520 (out of a total 734 predictions), Predictive correctness: 70.84468664850137%
+Correct Predictions: 534 (out of a total 735 predictions), Predictive correctness: 72.6530612244898%
+Correct Predictions: 542 (out of a total 737 predictions), Predictive correctness: 73.54138398914517%
+DIG
+Correct Predictions: 528 (out of a total 734 predictions), Predictive correctness: 71.93460490463215%
+Correct Predictions: 530 (out of a total 735 predictions), Predictive correctness: 72.10884353741497%
+Correct Predictions: 548 (out of a total 737 predictions), Predictive correctness: 74.35549525101763%
+URTH
+Correct Predictions: 170 (out of a total 259 predictions), Predictive correctness: 65.63706563706563%
+Correct Predictions: 186 (out of a total 260 predictions), Predictive correctness: 71.53846153846153%
+Correct Predictions: 189 (out of a total 262 predictions), Predictive correctness: 72.13740458015268%
+VNQI
+ACCU
+Correct Predictions: 150 (out of a total 245 predictions), Predictive correctness: 61.224489795918366%
+Correct Predictions: 169 (out of a total 246 predictions), Predictive correctness: 68.69918699186992%
+Correct Predictions: 176 (out of a total 248 predictions), Predictive correctness: 70.96774193548387%
+BJK
+Correct Predictions: 516 (out of a total 734 predictions), Predictive correctness: 70.29972752043598%
+Correct Predictions: 520 (out of a total 735 predictions), Predictive correctness: 70.74829931972789%
+Correct Predictions: 524 (out of a total 737 predictions), Predictive correctness: 71.09905020352781%
+TZW
+Correct Predictions: 240 (out of a total 364 predictions), Predictive correctness: 65.93406593406593%
+Correct Predictions: 256 (out of a total 365 predictions), Predictive correctness: 70.13698630136986%
+Correct Predictions: 255 (out of a total 367 predictions), Predictive correctness: 69.48228882833789%
+CARZ
+RXI
+Correct Predictions: 515 (out of a total 734 predictions), Predictive correctness: 70.16348773841962%
+Correct Predictions: 523 (out of a total 735 predictions), Predictive correctness: 71.156462585034%
+Correct Predictions: 539 (out of a total 737 predictions), Predictive correctness: 73.13432835820896%
+AADR
+Correct Predictions: 423 (out of a total 644 predictions), Predictive correctness: 65.6832298136646%
+Correct Predictions: 457 (out of a total 645 predictions), Predictive correctness: 70.85271317829456%
+Correct Predictions: 488 (out of a total 647 predictions), Predictive correctness: 75.42503863987635%
+IGEM
+Correct Predictions: 241 (out of a total 404 predictions), Predictive correctness: 59.65346534653465%
+Correct Predictions: 266 (out of a total 405 predictions), Predictive correctness: 65.67901234567901%
+Correct Predictions: 290 (out of a total 407 predictions), Predictive correctness: 71.25307125307125%
+COLX
+Correct Predictions: 301 (out of a total 476 predictions), Predictive correctness: 63.23529411764706%
+Correct Predictions: 335 (out of a total 477 predictions), Predictive correctness: 70.23060796645703%
+Correct Predictions: 331 (out of a total 479 predictions), Predictive correctness: 69.10229645093946%
+EEMS
+Correct Predictions: 251 (out of a total 364 predictions), Predictive correctness: 68.95604395604396%
+Correct Predictions: 269 (out of a total 365 predictions), Predictive correctness: 73.6986301369863%
+Correct Predictions: 272 (out of a total 367 predictions), Predictive correctness: 74.11444141689373%
+EMFN
+GMFS
+Correct Predictions: 199 (out of a total 259 predictions), Predictive correctness: 76.83397683397683%
+Correct Predictions: 167 (out of a total 260 predictions), Predictive correctness: 64.23076923076924%
+Correct Predictions: 175 (out of a total 262 predictions), Predictive correctness: 66.79389312977099%
+ECON
+Correct Predictions: 426 (out of a total 606 predictions), Predictive correctness: 70.29702970297029%
+Correct Predictions: 436 (out of a total 607 predictions), Predictive correctness: 71.82866556836903%
+Correct Predictions: 434 (out of a total 609 predictions), Predictive correctness: 71.26436781609196%
+FEM
+Correct Predictions: 327 (out of a total 451 predictions), Predictive correctness: 72.50554323725056%
+Correct Predictions: 340 (out of a total 452 predictions), Predictive correctness: 75.22123893805309%
+Correct Predictions: 337 (out of a total 454 predictions), Predictive correctness: 74.22907488986785%
+EWEF
+Correct Predictions: 380 (out of a total 545 predictions), Predictive correctness: 69.72477064220183%
+Correct Predictions: 398 (out of a total 546 predictions), Predictive correctness: 72.89377289377289%
+Correct Predictions: 411 (out of a total 548 predictions), Predictive correctness: 75.0%
+EEMV
+Correct Predictions: 233 (out of a total 319 predictions), Predictive correctness: 73.04075235109718%
+Correct Predictions: 234 (out of a total 320 predictions), Predictive correctness: 73.125%
+Correct Predictions: 233 (out of a total 322 predictions), Predictive correctness: 72.36024844720497%
+EELV
+Correct Predictions: 194 (out of a total 258 predictions), Predictive correctness: 75.1937984496124%
+Correct Predictions: 185 (out of a total 259 predictions), Predictive correctness: 71.42857142857143%
+Correct Predictions: 182 (out of a total 261 predictions), Predictive correctness: 69.73180076628353%
+PCY
+Correct Predictions: 531 (out of a total 734 predictions), Predictive correctness: 72.34332425068119%
+Correct Predictions: 526 (out of a total 735 predictions), Predictive correctness: 71.56462585034014%
+Correct Predictions: 509 (out of a total 737 predictions), Predictive correctness: 69.06377204884667%
+EMB
+Correct Predictions: 542 (out of a total 734 predictions), Predictive correctness: 73.84196185286103%
+Correct Predictions: 524 (out of a total 735 predictions), Predictive correctness: 71.29251700680273%
+Correct Predictions: 533 (out of a total 737 predictions), Predictive correctness: 72.3202170963365%
+KBWB
+Correct Predictions: 213 (out of a total 311 predictions), Predictive correctness: 68.48874598070739%
+Correct Predictions: 213 (out of a total 312 predictions), Predictive correctness: 68.26923076923077%
+Correct Predictions: 213 (out of a total 314 predictions), Predictive correctness: 67.83439490445859%
+KBWI
+Correct Predictions: 175 (out of a total 311 predictions), Predictive correctness: 56.27009646302251%
+Correct Predictions: 186 (out of a total 312 predictions), Predictive correctness: 59.61538461538461%
+Correct Predictions: 202 (out of a total 314 predictions), Predictive correctness: 64.3312101910828%
+KBWC
+Correct Predictions: 186 (out of a total 311 predictions), Predictive correctness: 59.80707395498393%
+Correct Predictions: 206 (out of a total 312 predictions), Predictive correctness: 66.02564102564102%
+Correct Predictions: 197 (out of a total 314 predictions), Predictive correctness: 62.738853503184714%
+CSD
+Correct Predictions: 516 (out of a total 734 predictions), Predictive correctness: 70.29972752043598%
+Correct Predictions: 512 (out of a total 735 predictions), Predictive correctness: 69.65986394557822%
+Correct Predictions: 495 (out of a total 737 predictions), Predictive correctness: 67.16417910447761%
+UGE
+Correct Predictions: 487 (out of a total 734 predictions), Predictive correctness: 66.34877384196184%
+Correct Predictions: 527 (out of a total 735 predictions), Predictive correctness: 71.70068027210884%
+Correct Predictions: 539 (out of a total 737 predictions), Predictive correctness: 73.13432835820896%
+PEJ
+Correct Predictions: 512 (out of a total 734 predictions), Predictive correctness: 69.75476839237056%
+Correct Predictions: 522 (out of a total 735 predictions), Predictive correctness: 71.0204081632653%
+Correct Predictions: 517 (out of a total 737 predictions), Predictive correctness: 70.1492537313433%
+KBWY
+Correct Predictions: 390 (out of a total 549 predictions), Predictive correctness: 71.03825136612022%
+Correct Predictions: 379 (out of a total 550 predictions), Predictive correctness: 68.9090909090909%
+Correct Predictions: 389 (out of a total 552 predictions), Predictive correctness: 70.47101449275362%
+RTL
+Correct Predictions: 522 (out of a total 734 predictions), Predictive correctness: 71.11716621253406%
+Correct Predictions: 537 (out of a total 735 predictions), Predictive correctness: 73.06122448979592%
+Correct Predictions: 524 (out of a total 737 predictions), Predictive correctness: 71.09905020352781%
+XRT
+Correct Predictions: 547 (out of a total 734 predictions), Predictive correctness: 74.52316076294278%
+Correct Predictions: 541 (out of a total 735 predictions), Predictive correctness: 73.60544217687075%
+Correct Predictions: 557 (out of a total 737 predictions), Predictive correctness: 75.57666214382633%
+UCC
+Correct Predictions: 527 (out of a total 734 predictions), Predictive correctness: 71.7983651226158%
+Correct Predictions: 534 (out of a total 735 predictions), Predictive correctness: 72.6530612244898%
+Correct Predictions: 532 (out of a total 737 predictions), Predictive correctness: 72.18453188602443%
+EWMD
+Correct Predictions: 258 (out of a total 374 predictions), Predictive correctness: 68.98395721925134%
+Correct Predictions: 261 (out of a total 375 predictions), Predictive correctness: 69.6%
+Correct Predictions: 269 (out of a total 377 predictions), Predictive correctness: 71.3527851458886%
+RETL
+Correct Predictions: 461 (out of a total 650 predictions), Predictive correctness: 70.92307692307692%
+Correct Predictions: 470 (out of a total 651 predictions), Predictive correctness: 72.19662058371735%
+Correct Predictions: 454 (out of a total 653 predictions), Predictive correctness: 69.52526799387442%
+KBWP
+Correct Predictions: 366 (out of a total 549 predictions), Predictive correctness: 66.66666666666666%
+Correct Predictions: 376 (out of a total 550 predictions), Predictive correctness: 68.36363636363636%
+Correct Predictions: 377 (out of a total 552 predictions), Predictive correctness: 68.29710144927536%
+EWSM
+Correct Predictions: 223 (out of a total 374 predictions), Predictive correctness: 59.62566844919787%
+Correct Predictions: 246 (out of a total 375 predictions), Predictive correctness: 65.60000000000001%
+Correct Predictions: 260 (out of a total 377 predictions), Predictive correctness: 68.96551724137932%
+PXLV
+Correct Predictions: 264 (out of a total 409 predictions), Predictive correctness: 64.54767726161369%
+Correct Predictions: 281 (out of a total 410 predictions), Predictive correctness: 68.53658536585367%
+Correct Predictions: 284 (out of a total 412 predictions), Predictive correctness: 68.93203883495146%
+FNK
+Correct Predictions: 324 (out of a total 450 predictions), Predictive correctness: 72.0%
+Correct Predictions: 318 (out of a total 451 predictions), Predictive correctness: 70.50997782705099%
+Correct Predictions: 330 (out of a total 453 predictions), Predictive correctness: 72.84768211920529%
+FPX
+Correct Predictions: 520 (out of a total 734 predictions), Predictive correctness: 70.84468664850137%
+Correct Predictions: 534 (out of a total 735 predictions), Predictive correctness: 72.6530612244898%
+Correct Predictions: 533 (out of a total 737 predictions), Predictive correctness: 72.3202170963365%
+VONV
+PSCM
+VOOV
+Correct Predictions: 431 (out of a total 609 predictions), Predictive correctness: 70.77175697865353%
+Correct Predictions: 421 (out of a total 610 predictions), Predictive correctness: 69.01639344262294%
+Correct Predictions: 443 (out of a total 612 predictions), Predictive correctness: 72.38562091503267%
+EDEN
+Correct Predictions: 176 (out of a total 249 predictions), Predictive correctness: 70.68273092369478%
+Correct Predictions: 173 (out of a total 250 predictions), Predictive correctness: 69.19999999999999%
+Correct Predictions: 161 (out of a total 252 predictions), Predictive correctness: 63.888888888888886%
+EWGS
+Correct Predictions: 170 (out of a total 249 predictions), Predictive correctness: 68.27309236947792%
+Correct Predictions: 184 (out of a total 250 predictions), Predictive correctness: 73.6%
+Correct Predictions: 185 (out of a total 252 predictions), Predictive correctness: 73.4126984126984%
+EWSS
+Correct Predictions: 161 (out of a total 256 predictions), Predictive correctness: 62.890625%
+Correct Predictions: 172 (out of a total 257 predictions), Predictive correctness: 66.9260700389105%
+Correct Predictions: 175 (out of a total 259 predictions), Predictive correctness: 67.56756756756756%
+AXSL
+Correct Predictions: 418 (out of a total 646 predictions), Predictive correctness: 64.70588235294117%
+Correct Predictions: 425 (out of a total 647 predictions), Predictive correctness: 65.68778979907263%
+Correct Predictions: 501 (out of a total 649 predictions), Predictive correctness: 77.19568567026194%
+EWUS
+Correct Predictions: 165 (out of a total 249 predictions), Predictive correctness: 66.26506024096386%
+Correct Predictions: 172 (out of a total 250 predictions), Predictive correctness: 68.8%
+Correct Predictions: 185 (out of a total 252 predictions), Predictive correctness: 73.4126984126984%
+ENZL
+Correct Predictions: 419 (out of a total 614 predictions), Predictive correctness: 68.24104234527687%
+Correct Predictions: 445 (out of a total 615 predictions), Predictive correctness: 72.35772357723577%
+Correct Predictions: 453 (out of a total 617 predictions), Predictive correctness: 73.41977309562398%
+DBJP
+Correct Predictions: 286 (out of a total 414 predictions), Predictive correctness: 69.08212560386472%
+Correct Predictions: 287 (out of a total 415 predictions), Predictive correctness: 69.1566265060241%
+Correct Predictions: 307 (out of a total 417 predictions), Predictive correctness: 73.621103117506%
+EWHS
+Correct Predictions: 177 (out of a total 258 predictions), Predictive correctness: 68.6046511627907%
+Correct Predictions: 171 (out of a total 259 predictions), Predictive correctness: 66.02316602316603%
+Correct Predictions: 182 (out of a total 261 predictions), Predictive correctness: 69.73180076628353%
+EPHE
+Correct Predictions: 409 (out of a total 595 predictions), Predictive correctness: 68.73949579831933%
+Correct Predictions: 409 (out of a total 596 predictions), Predictive correctness: 68.6241610738255%
+Correct Predictions: 454 (out of a total 598 predictions), Predictive correctness: 75.91973244147158%
+DBEF
+Correct Predictions: 276 (out of a total 414 predictions), Predictive correctness: 66.66666666666666%
+Correct Predictions: 294 (out of a total 415 predictions), Predictive correctness: 70.8433734939759%
+Correct Predictions: 284 (out of a total 417 predictions), Predictive correctness: 68.10551558752998%
+PALL
+Correct Predictions: 516 (out of a total 734 predictions), Predictive correctness: 70.29972752043598%
+Correct Predictions: 537 (out of a total 735 predictions), Predictive correctness: 73.06122448979592%
+Correct Predictions: 532 (out of a total 737 predictions), Predictive correctness: 72.18453188602443%
+SPGH
+Correct Predictions: 504 (out of a total 734 predictions), Predictive correctness: 68.66485013623979%
+Correct Predictions: 510 (out of a total 735 predictions), Predictive correctness: 69.38775510204081%
+Correct Predictions: 528 (out of a total 737 predictions), Predictive correctness: 71.64179104477611%
+UGL
+Correct Predictions: 522 (out of a total 734 predictions), Predictive correctness: 71.11716621253406%
+Correct Predictions: 541 (out of a total 735 predictions), Predictive correctness: 73.60544217687075%
+Correct Predictions: 551 (out of a total 737 predictions), Predictive correctness: 74.76255088195387%
+SLV
+Correct Predictions: 528 (out of a total 734 predictions), Predictive correctness: 71.93460490463215%
+Correct Predictions: 541 (out of a total 735 predictions), Predictive correctness: 73.60544217687075%
+Correct Predictions: 541 (out of a total 737 predictions), Predictive correctness: 73.40569877883311%
