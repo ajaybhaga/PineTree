@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+
+<html>
+<head>	
+    <title>PineTree Predictor</title>
+
+  <script language="javascript" type="text/javascript" src="jqplot/jquery.min.js"></script>
+  <script language="javascript" type="text/javascript" src="jqplot/jquery.jqplot.min.js"></script>
+  <link class="include" rel="stylesheet" type="text/css" href="jqplot/jquery.jqplot.min.css" />    
+    
+  <!--[if lt IE 9]><script language="javascript" type="text/javascript" src="../excanvas.js"></script><![endif]-->
+        
+    <script type="text/javascript" src="data_1.js"></script>
+    <script type="text/javascript" src="data_2.js"></script>
+    <script type="text/javascript" src="data_4.js"></script>
+    
+    <script type="text/javascript" src="jqplot/plugins/jqplot.dateAxisRenderer.min.js"></script>
+    <script type="text/javascript" src="jqplot/plugins/jqplot.canvasTextRenderer.min.js"></script>
+    <script type="text/javascript" src="jqplot/plugins/jqplot.canvasAxisTickRenderer.min.js"></script>
+    <script type="text/javascript" src="jqplot/plugins/jqplot.categoryAxisRenderer.min.js"></script>
+    
+    <script type="text/javascript" src="jqplot/plugins/jqplot.ohlcRenderer.min.js"></script>
+    <script type="text/javascript" src="jqplot/plugins/jqplot.highlighter.js"></script>
+    <script type="text/javascript" src="jqplot/plugins/jqplot.cursor.min.js"></script>
+
+</head>
+<body>
+      
+<div id="controller_chart" style="margin:20px;height:300px; width:100%;"></div>
+<div id="price_chart" style="margin:20px;height:340px; width:100%;"></div>
+<div id="forecast_chart" style="margin:20px;height:340px; width:100%;"></div>
+<div id="forecastError_chart" style="margin:20px;height:340px; width:100%;"></div>
+<div id="forecastDirectionError_chart" style="margin:20px;height:340px; width:100%;"></div>
+<div id="macd_chart" style="margin:20px;height:340px; width:100%;"></div>
+<div id="macd_zero_chart" style="margin:20px;height:340px; width:100%;"></div>
+<div id="macd_peak_chart" style="margin:20px;height:340px; width:100%;"></div>
+<div id="macd_peak_score_chart" style="margin:20px;height:340px; width:100%;"></div>
+<div id="mfi_chart" style="margin:20px;height:340px; width:100%;"></div>
+<div id="cci_chart" style="margin:20px;height:340px; width:100%;"></div>
+<div id="mfi_cci_zero_chart" style="margin:20px;height:340px; width:100%;"></div>
+
+<script type="text/javascript">$(document).ready(function(){
+    $.jqplot.config.enablePlugins = true;
+        
+    controller_plot = $.jqplot('controller_chart',[ohlc_1],{
+      title: name,
+      axesDefaults: {               
+          useSeriesColor:true, 
+          rendererOptions: {
+            //alignTicks: true
+          }          
+        },
+        
+      axes: {
+          xaxis: {
+              renderer: $.jqplot.CategoryAxisRenderer,
+              rendererOptions:{tickRenderer:$.jqplot.CanvasAxisTickRenderer},
+              tickOptions:{ prefix: '', formatString: "%m/%d/%Y %H:%M:%S", angle: 90, fontSize: '8pt' }
+          },
+          yaxis: {
+              tickOptions:{ prefix: '', formatString: "%#.2f" }
+          }
+      },
+      series: [{renderer:$.jqplot.OHLCRenderer, rendererOptions:{candleStick:true,fillUpBody:true,upBodyColor:'#00E000',downBodyColor:'#FF0000'}}],
+      
+      cursor:{
+          show: true,
+          showTooltip: false,
+          zoom:true,
+          constrainZoomTo: 'x'
+      },
+      highlighter: {
+          show: true,
+          tooltipContentEditor:
+              function(str, seriesIndex, pointIndex, plot) {
+                // display series_label, x-axis_tick, y-axis value
+                return  "Date: " + plot.data[seriesIndex][pointIndex][0] + "<br\>" 
+                + "Open: " + plot.data[seriesIndex][pointIndex][1] + "<br\>"
+                + "High: " + plot.data[seriesIndex][pointIndex][2] + "<br\>"
+                + "Low: " + plot.data[seriesIndex][pointIndex][3] + "<br\>"
+                + "Close: " + plot.data[seriesIndex][pointIndex][4];
+              }
+      }
+    });
+                
+    plot1 = $.jqplot('price_chart',[ohlc_1],{
+      title: 'Price',
+      axesDefaults: {               
+          useSeriesColor:true, 
+          rendererOptions: {
+            alignTicks: true
+          }          
+        },
+        
+      axes: {
+          xaxis: {
+              renderer: $.jqplot.CategoryAxisRenderer,
+              rendererOptions:{tickRenderer:$.jqplot.CanvasAxisTickRenderer},
+              tickOptions:{ prefix: '', formatString: "%m/%d/%Y %H:%M:%S", angle: 90, fontSize: '8pt' }
+          },
+          yaxis: {
+              tickOptions:{ prefix: '', formatString: "%#.2f" }
+          }
+      },
+      series: [{renderer:$.jqplot.OHLCRenderer, rendererOptions:{candleStick:true,fillUpBody:true,upBodyColor:'#00E000',downBodyColor:'#FF0000'}}],
+      
+      cursor:{
+          zoom:true,
+          constrainZoomTo: 'x',
+          tooltipOffset: 10,
+          tooltipLocation: 'nw'
+      },
+      highlighter: {
+          show: true,
+          tooltipContentEditor:
+              function(str, seriesIndex, pointIndex, plot) {
+                // display series_label, x-axis_tick, y-axis value
+                return  "Date: " + plot.data[seriesIndex][pointIndex][0] + "<br\>" 
+                + "Open: " + plot.data[seriesIndex][pointIndex][1] + "<br\>"
+                + "High: " + plot.data[seriesIndex][pointIndex][2] + "<br\>"
+                + "Low: " + plot.data[seriesIndex][pointIndex][3] + "<br\>"
+                + "Close: " + plot.data[seriesIndex][pointIndex][4];
+              }
+      }
+    });
+    
+    plot2 = $.jqplot('macd_chart',[macd_1],{
+      title: 'MACD',
+      axesDefaults: {               
+          useSeriesColor:true, 
+          rendererOptions: {
+            alignTicks: true
+          }          
+        },
+        
+      axes: {
+          xaxis: {
+              renderer: $.jqplot.CategoryAxisRenderer,
+              rendererOptions:{tickRenderer:$.jqplot.CanvasAxisTickRenderer},
+              tickOptions:{ prefix: '', formatString: "%m/%d/%Y %H:%M:%S", angle: 90, fontSize: '8pt' }
+          },
+          yaxis: {
+              tickOptions:{ prefix: '', formatString: "%#.2f" }
+          }
+      },
+
+      series:[{lineWidth:2, color: '#711D9F', markerOptions: {show: false}}],
+      
+      
+      cursor:{
+          zoom:true,
+          constrainZoomTo: 'x',
+          tooltipOffset: 10,
+          tooltipLocation: 'nw'
+      },
+      highlighter: {
+          show: true,
+          tooltipContentEditor:
+              function(str, seriesIndex, pointIndex, plot) {
+                // display series_label, x-axis_tick, y-axis value
+                return  "Date: " + plot.data[seriesIndex][pointIndex][0] + "<br\>" 
+                + "Value: " + plot.data[seriesIndex][pointIndex][1];
+              }
+      }
+    });
+    
+    plot3 = $.jqplot('macd_zero_chart',[macdZeroScore_1],{
+      title: 'MACD Zero Chart',
+      axesDefaults: {               
+          useSeriesColor:true, 
+          rendererOptions: {
+            alignTicks: true
+          }          
+        },
+        
+      axes: {
+          xaxis: {
+              renderer: $.jqplot.CategoryAxisRenderer,
+              rendererOptions:{tickRenderer:$.jqplot.CanvasAxisTickRenderer},
+              tickOptions:{ prefix: '', formatString: "%m/%d/%Y %H:%M:%S", angle: 90, fontSize: '8pt' }
+          },
+          yaxis: {
+              tickOptions:{ prefix: '', formatString: "%#.2f" }
+          }
+      },
+
+      series:[{lineWidth:2, color: '#9F1D40', markerOptions: {show: false}}],
+      
+      
+      cursor:{
+          zoom:true,
+          constrainZoomTo: 'x',
+          tooltipOffset: 10,
+          tooltipLocation: 'nw'
+      },
+      highlighter: {
+          show: true,
+          tooltipContentEditor:
+              function(str, seriesIndex, pointIndex, plot) {
+                // display series_label, x-axis_tick, y-axis value
+                return  "Date: " + plot.data[seriesIndex][pointIndex][0] + "<br\>" 
+                + "Value: " + plot.data[seriesIndex][pointIndex][1];
+              }
+      }
+    });
+    
+    plot4a = $.jqplot('macd_peak_chart',[macdPeak_1],{
+      title: 'MACD Peak Chart',
+      axesDefaults: {               
+          useSeriesColor:true, 
+          rendererOptions: {
+            alignTicks: true
+          }          
+        },
+        
+      axes: {
+          xaxis: {
+              renderer: $.jqplot.CategoryAxisRenderer,
+              rendererOptions:{tickRenderer:$.jqplot.CanvasAxisTickRenderer},
+              tickOptions:{ prefix: '', formatString: "%m/%d/%Y %H:%M:%S", angle: 90, fontSize: '8pt' }
+          },
+          yaxis: {
+              tickOptions:{ prefix: '', formatString: "%#.2f" }
+          }
+      },
+
+      series:[{lineWidth:2, color: '#1D9F4F', markerOptions: {show: false}}],
+      
+      
+      cursor:{
+          zoom:true,
+          constrainZoomTo: 'x',
+          tooltipOffset: 10,
+          tooltipLocation: 'nw'
+      },
+      highlighter: {
+          show: true,
+          tooltipContentEditor:
+              function(str, seriesIndex, pointIndex, plot) {
+                // display series_label, x-axis_tick, y-axis value
+                return  "Date: " + plot.data[seriesIndex][pointIndex][0] + "<br\>" 
+                + "Value: " + plot.data[seriesIndex][pointIndex][1];
+              }
+      }
+    });
+    
+    plot4b = $.jqplot('macd_peak_score_chart',[macdPeakScore_1],{
+      title: 'MACD Peak Score Chart',
+      axesDefaults: {               
+          useSeriesColor:true, 
+          rendererOptions: {
+            alignTicks: true
+          }          
+        },
+        
+      axes: {
+          xaxis: {
+              renderer: $.jqplot.CategoryAxisRenderer,
+              rendererOptions:{tickRenderer:$.jqplot.CanvasAxisTickRenderer},
+              tickOptions:{ prefix: '', formatString: "%m/%d/%Y %H:%M:%S", angle: 90, fontSize: '8pt' }
+          },
+          yaxis: {
+              tickOptions:{ prefix: '', formatString: "%#.2f" }
+          }
+      },
+
+      series:[{lineWidth:2, color: '#1D9F4F', markerOptions: {show: false}}],
+      
+      
+      cursor:{
+          zoom:true,
+          constrainZoomTo: 'x',
+          tooltipOffset: 10,
+          tooltipLocation: 'nw'
+      },
+      highlighter: {
+          show: true,
+          tooltipContentEditor:
+              function(str, seriesIndex, pointIndex, plot) {
+                // display series_label, x-axis_tick, y-axis value
+                return  "Date: " + plot.data[seriesIndex][pointIndex][0] + "<br\>" 
+                + "Value: " + plot.data[seriesIndex][pointIndex][1];
+              }
+      }
+    });
+    
+    plot5 = $.jqplot('forecast_chart',[forecast_1,forecast_2,forecast_4,close],{
+      title: 'Prediction',
+      axesDefaults: {               
+          useSeriesColor:true, 
+          rendererOptions: {
+            alignTicks: true
+          }          
+        },
+        
+      axes: {
+          xaxis: {
+              renderer: $.jqplot.CategoryAxisRenderer,
+              rendererOptions:{tickRenderer:$.jqplot.CanvasAxisTickRenderer},
+              tickOptions:{ prefix: '', formatString: "%m/%d/%Y %H:%M:%S", angle: 90, fontSize: '8pt' }
+          },
+          yaxis: {
+              tickOptions:{ prefix: '', formatString: "%#.2f" }
+          }
+      },
+
+      series:[{lineWidth:3, markerOptions: { show: false, size: 5 }},
+              {lineWidth:3, markerOptions: { show: false, size: 5 }},
+              {lineWidth:3, markerOptions: { show: false, size: 5 }},
+              {lineWidth:3, markerOptions: { show: false, size: 5 }}],
+                
+               
+      legend: {         
+        show: true,
+        location: 'se',     // compass direction, nw, n, ne, e, se, s, sw, w.
+        showLabels: true,
+        labels: ['1 Step Prediction', '2 Step Prediction', '4 Step Prediction', 'Actual']
+      },      
+      
+      cursor:{
+          zoom:true,
+          constrainZoomTo: 'x',
+          tooltipOffset: 10,
+          tooltipLocation: 'nw'
+      },
+      highlighter: {
+          show: true,
+          tooltipContentEditor:
+              function(str, seriesIndex, pointIndex, plot) {
+                // display series_label, x-axis_tick, y-axis value
+                return  "Date: " + plot.data[seriesIndex][pointIndex][0] + "<br\>" 
+                + "Value: " + plot.data[seriesIndex][pointIndex][1];
+              }
+      }
+    });
+    
+    plot6 = $.jqplot('forecastError_chart',[forecastError_1,forecastError_2,forecastError_4],{
+      title: 'Prediction Error',
+      axesDefaults: {               
+          useSeriesColor:true, 
+          rendererOptions: {
+            alignTicks: true
+          }          
+        },
+        
+      axes: {
+          xaxis: {
+              renderer: $.jqplot.CategoryAxisRenderer,
+              rendererOptions:{tickRenderer:$.jqplot.CanvasAxisTickRenderer},
+              tickOptions:{ prefix: '', formatString: "%m/%d/%Y %H:%M:%S", angle: 90, fontSize: '8pt' }
+          },
+          yaxis: {
+              tickOptions:{ prefix: '', formatString: "%#.2f" }
+          }
+      },
+
+      series:[{lineWidth:3, markerOptions: { show: false, size: 5 }},
+              {lineWidth:3, markerOptions: { show: false, size: 5 }},
+              {lineWidth:3, markerOptions: { show: false, size: 5 }},
+              {lineWidth:3, markerOptions: { show: false, size: 5 }}],                               
+      
+         
+        legend:            
+        {
+        show: true,
+        location: 'se',     // compass direction, nw, n, ne, e, se, s, sw, w.
+        showLabels: true,
+        labels: ['1 Step Prediction', '2 Step Prediction', '4 Step Prediction', 'Actual']
+        }, 
+        
+      cursor:{
+          zoom:true,
+          constrainZoomTo: 'x',
+          tooltipOffset: 10,
+          tooltipLocation: 'nw'
+      },
+      highlighter: {
+          show: true,
+          tooltipContentEditor:
+              function(str, seriesIndex, pointIndex, plot) {
+                // display series_label, x-axis_tick, y-axis value
+                return  "Date: " + plot.data[seriesIndex][pointIndex][0] + "<br\>" 
+                + "Value: " + plot.data[seriesIndex][pointIndex][1];
+              }
+      }
+    });
+    
+    plot7 = $.jqplot('forecastDirectionError_chart',[forecastDirectionError_1,forecastDirectionError_2,forecastDirectionError_4],{
+      title: 'Prediction Direction Error',
+      axesDefaults: {               
+          useSeriesColor:true, 
+          rendererOptions: {
+            alignTicks: true
+          }          
+        },
+        
+      axes: {
+          xaxis: {
+              renderer: $.jqplot.CategoryAxisRenderer,
+              rendererOptions:{tickRenderer:$.jqplot.CanvasAxisTickRenderer},
+              tickOptions:{ prefix: '', formatString: "%m/%d/%Y %H:%M:%S", angle: 90, fontSize: '8pt' }
+          },
+          yaxis: {
+              tickOptions:{ prefix: '', formatString: "%#.2f" }
+          }
+      },
+
+      series:[{lineWidth:3, markerOptions: { show: false, size: 5 }},
+              {lineWidth:3, markerOptions: { show: false, size: 5 }},
+              {lineWidth:3, markerOptions: { show: false, size: 5 }},
+              {lineWidth:3, markerOptions: { show: false, size: 5 }}],                               
+
+        legend:            
+        {
+        show: true,
+        location: 'se',     // compass direction, nw, n, ne, e, se, s, sw, w.
+        showLabels: true,
+        labels: ['1 Step Prediction', '2 Step Prediction', '4 Step Prediction', 'Actual']
+        }, 
+
+      cursor:{
+          zoom:true,
+          constrainZoomTo: 'x',
+          tooltipOffset: 10,
+          tooltipLocation: 'nw'
+      },
+      highlighter: {
+          show: true,
+          tooltipContentEditor:
+              function(str, seriesIndex, pointIndex, plot) {
+                // display series_label, x-axis_tick, y-axis value
+                return  "Date: " + plot.data[seriesIndex][pointIndex][0] + "<br\>" 
+                + "Value: " + plot.data[seriesIndex][pointIndex][1];
+              }
+      }
+    });
+    
+    plot8 = $.jqplot('mfi_chart',[MFI_1],{
+      title: 'MFI Chart',
+      axesDefaults: {               
+          useSeriesColor:true, 
+          rendererOptions: {
+            alignTicks: true
+          }          
+        },
+        
+      axes: {
+          xaxis: {
+              renderer: $.jqplot.CategoryAxisRenderer,
+              rendererOptions:{tickRenderer:$.jqplot.CanvasAxisTickRenderer},
+              tickOptions:{ prefix: '', formatString: "%m/%d/%Y %H:%M:%S", angle: 90, fontSize: '8pt' }
+          },
+          yaxis: {
+              tickOptions:{ prefix: '', formatString: "%#.2f" }
+          }
+      },
+
+      series:[{lineWidth:2, color: '#D41964', markerOptions: {show: false}}],      
+      
+      cursor:{
+          zoom:true,
+          constrainZoomTo: 'x',
+          tooltipOffset: 10,
+          tooltipLocation: 'nw'
+      },
+      highlighter: {
+          show: true,
+          tooltipContentEditor:
+              function(str, seriesIndex, pointIndex, plot) {
+                // display series_label, x-axis_tick, y-axis value
+                return  "Date: " + plot.data[seriesIndex][pointIndex][0] + "<br\>" 
+                + "Value: " + plot.data[seriesIndex][pointIndex][1];
+              }
+      }
+    });
+    
+    plot9 = $.jqplot('cci_chart',[CCI_1],{
+      title: 'CCI Chart',
+      axesDefaults: {               
+          useSeriesColor:true, 
+          rendererOptions: {
+            alignTicks: true
+          }          
+        },
+        
+      axes: {
+          xaxis: {
+              renderer: $.jqplot.CategoryAxisRenderer,
+              rendererOptions:{tickRenderer:$.jqplot.CanvasAxisTickRenderer},
+              tickOptions:{ prefix: '', formatString: "%m/%d/%Y %H:%M:%S", angle: 90, fontSize: '8pt' }
+          },
+          yaxis: {
+              tickOptions:{ prefix: '', formatString: "%#.2f" }
+          }
+      },
+
+      series:[{lineWidth:2, color: '#D4BE19', markerOptions: {show: false}}],
+      
+      
+      cursor:{
+          zoom:true,
+          constrainZoomTo: 'x',
+          tooltipOffset: 10,
+          tooltipLocation: 'nw'
+      },
+      highlighter: {
+          show: true,
+          tooltipContentEditor:
+              function(str, seriesIndex, pointIndex, plot) {
+                // display series_label, x-axis_tick, y-axis value
+                return  "Date: " + plot.data[seriesIndex][pointIndex][0] + "<br\>" 
+                + "Value: " + plot.data[seriesIndex][pointIndex][1];
+              }
+      }
+    });
+
+    plot10 = $.jqplot('mfi_cci_zero_chart',[mfiCciZeroScore_1],{
+      title: 'MFI CCI Score Chart',
+      axesDefaults: {               
+          useSeriesColor:true, 
+          rendererOptions: {
+            alignTicks: true
+          }          
+        },
+        
+      axes: {
+          xaxis: {
+              renderer: $.jqplot.CategoryAxisRenderer,
+              rendererOptions:{tickRenderer:$.jqplot.CanvasAxisTickRenderer},
+              tickOptions:{ prefix: '', formatString: "%m/%d/%Y %H:%M:%S", angle: 90, fontSize: '8pt' }
+          },
+          yaxis: {
+              tickOptions:{ prefix: '', formatString: "%#.2f" }
+          }
+      },
+
+      series:[{lineWidth:2, color: '#33A7A6', markerOptions: {show: false}}],
+      
+      
+      cursor:{
+          zoom:true,
+          constrainZoomTo: 'x',
+          tooltipOffset: 10,
+          tooltipLocation: 'nw'
+      },
+      highlighter: {
+          show: true,
+          tooltipContentEditor:
+              function(str, seriesIndex, pointIndex, plot) {
+                // display series_label, x-axis_tick, y-axis value
+                return  "Date: " + plot.data[seriesIndex][pointIndex][0] + "<br\>" 
+                + "Value: " + plot.data[seriesIndex][pointIndex][1];
+              }
+      }
+    });
+
+
+$.jqplot.Cursor.zoomProxy(plot1, controller_plot);
+$.jqplot.Cursor.zoomProxy(plot2, controller_plot);
+$.jqplot.Cursor.zoomProxy(plot3, controller_plot);
+$.jqplot.Cursor.zoomProxy(plot4a, controller_plot);
+$.jqplot.Cursor.zoomProxy(plot4b, controller_plot);
+//$.jqplot.Cursor.zoomProxy(plot5, controller_plot);
+$.jqplot.Cursor.zoomProxy(plot6, controller_plot);
+$.jqplot.Cursor.zoomProxy(plot7, controller_plot);
+$.jqplot.Cursor.zoomProxy(plot8, controller_plot);
+$.jqplot.Cursor.zoomProxy(plot9, controller_plot);
+$.jqplot.Cursor.zoomProxy(plot10, controller_plot);
+
+
+});
+
+
+</script>
+
+</body>
+
+</html>
