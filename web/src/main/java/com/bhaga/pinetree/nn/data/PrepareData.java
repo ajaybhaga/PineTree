@@ -22,8 +22,8 @@ import com.bhaga.pinetree.nn.Utility.FileUtils;
 import com.bhaga.pinetree.nn.Utility.loader.EODFinanceLoader;
 import com.bhaga.pinetree.nn.data.candlestick.CandlestickPattern;
 import com.bhaga.pinetree.nn.exception.NoDataException;
+import com.bhaga.pinetree.nn.exception.NotLoggedInException;
 import com.bhaga.pinetree.ui.Progress;
-import com.bhaga.pinetree.ui.data.ResultData;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -200,8 +200,8 @@ public class PrepareData {
      * @param begin The beginning date.
      * @param end The ending date.
      */
-    public void load(String symbol, final Date begin, final Date end, final int forwardStep) throws SOAPException, SOAPException, MalformedURLException, IOException, ParseException, NoDataException {
-        prepare(new TickerSymbol(symbol, "AMEX"), begin, end, forwardStep);
+    public void load(String symbol, String exchange, final Date begin, final Date end, final int forwardStep) throws SOAPException, SOAPException, MalformedURLException, IOException, ParseException, NoDataException {
+        prepare(new TickerSymbol(symbol, exchange), begin, end, forwardStep);
     }
 
     /**
@@ -507,7 +507,7 @@ public class PrepareData {
         // Calculate variation of percentage max and min
         double maxD = -9999.0D;
         double minD = 9999.0D;
-        int varLookBack = 120; // Look back n days
+        int varLookBack = Math.min(120, maxLength - 1); // Look back n days
         for (int j = (maxBegIdx + maxLength) - varLookBack; j < maxBegIdx + maxLength; j++) {
             if (j + forwardStep < maxBegIdx + maxLength) {
 
@@ -519,6 +519,8 @@ public class PrepareData {
                 maxD = Math.max(varPct, maxD);
             }
         }
+
+        System.out.println("Calculating variation bounds...");
 
         // Calculate U max and min
         double minU = Math.floor(minD);
@@ -1153,7 +1155,7 @@ public class PrepareData {
         ChartData chartData = new ChartData(ticker.getSymbol(), inputDate, inputOpen, inputHigh, inputLow, inputClose, forecast, forecastError, forecastDirectionError, maxBegIdx, maxLength, macd, macdPeak, macdPeakScore, macdZeroScore, mfi, cci, mfiCciZeroScore);
         FileUtils.writeChartData(chartData, forwardStep);
         // Store chart data in result
-        resultData.setChartData(chartData);
+        resultData.setChartData(chartData, forwardStep);
 
         System.out.println("Commodity: " + ticker.getSymbol());
         System.out.println("MSE: " + mse + ", Directional MSE: " + directionalMse);

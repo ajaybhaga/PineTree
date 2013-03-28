@@ -20,8 +20,10 @@ public class ControllerChart extends Chart {
         String pattern = "MM/dd/yyyy HH:mm:ss";
         SimpleDateFormat format = new SimpleDateFormat(pattern);
 
+        int numPoints = 40;
         String dataJS = "var #id#_s1 = [";
-        for (int i = chartData.getMaxBegIdx(); i < chartData.getInputClose().length; i++) {
+        //for (int i = chartData.getMaxBegIdx(); i < chartData.getInputClose().length; i++) {
+        for (int i = chartData.getInputClose().length - numPoints; i < chartData.getInputClose().length; i++) {
             String dateStr = format.format(chartData.getInputDate()[i]);
 
             dataJS = dataJS + "['" + dateStr + "'," + chartData.getInputOpen()[i] + "," + chartData.getInputHigh()[i] + "," + chartData.getInputLow()[i] + "," + chartData.getInputClose()[i] + "]";
@@ -36,7 +38,7 @@ public class ControllerChart extends Chart {
                 "var #id#_plot;"
                 + dataJS
                 + "var #id#_plot_options = {"
-                + "title: name,"
+                + "title: 'OHLC',"
                 + "axesDefaults: {"
                 + "useSeriesColor:true,"
                 + "rendererOptions: {"
@@ -54,10 +56,10 @@ public class ControllerChart extends Chart {
                 + "},"
                 + "series: [{renderer:$.jqplot.OHLCRenderer, rendererOptions:{candleStick:true,fillUpBody:true,upBodyColor:'#00E000',downBodyColor:'#FF0000'}}],"
                 + "cursor:{"
-                + "show: true,"
+                + "show: false,"
                 + "showTooltip: false,"
-                + "zoom:true,"
-                + "constrainZoomTo: 'x'"
+                + "zoom:false,"
+                //+ "constrainZoomTo: 'x'"
                 + "},"
                 + "highlighter: {"
                 + "show: true,"

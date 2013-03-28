@@ -9,7 +9,12 @@
  */
 package com.bhaga.pinetree.ui.data;
 
+import com.bhaga.pinetree.nn.data.ResultData;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 public class DataProvider {
 
@@ -25,10 +30,36 @@ public class DataProvider {
         public static final int TIME_INTERVAL_DAILY = 1;
         public static final String[] TIME_INTERVAL = {"Hourly", "Daily"};
     }
+    private HashMap<String, List<ResultData>> resultDataHashMap;
 
     /**
      * Initialize the data for this application.
      */
     public DataProvider() {
+        // Instantiate hash map
+        resultDataHashMap = new HashMap<String, List<ResultData>>();
+    }
+
+    public void addResultData(String symbol, ResultData resultData) {
+
+        List resultDataList = resultDataHashMap.get(symbol);
+        if (resultDataList != null) {
+            // Ensure we add no duplicates
+            if (!resultDataList.contains(resultData)) {
+                resultDataList.add(resultData);
+            }
+        } else {
+            resultDataList = new ArrayList();
+            resultDataList.add(resultData);
+            resultDataHashMap.put(symbol, resultDataList);
+        }
+    }
+
+    public List<ResultData> getAllResultDataBySymbol(String symbol) {
+        return resultDataHashMap.get(symbol);
+    }
+    
+    public Set<String> getAllResultDataKeySet() {
+        return resultDataHashMap.keySet();
     }
 }

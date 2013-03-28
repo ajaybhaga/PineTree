@@ -11,9 +11,8 @@ package com.bhaga.pinetree.ui;
 
 import com.bhaga.pinetree.nn.MarketBuildTraining;
 import com.bhaga.pinetree.ui.data.DataProvider;
-import com.bhaga.pinetree.ui.data.ResultData;
+import com.bhaga.pinetree.nn.data.ResultData;
 import com.bhaga.pinetree.ui.util.StringUtility;
-import com.cs.Chart;
 import com.github.wolfie.refresher.Refresher;
 import com.github.wolfie.refresher.Refresher.RefreshListener;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -44,6 +43,7 @@ public class AnalyzeView extends VerticalLayout implements View {
     private Worker worker = null;
     private Progress progress;
     TextField symbol = new TextField("Symbol:");
+    TextField exchange = new TextField("Exchange:");
     private Button analyze = new Button("Analyze");
     private ComboBox intervalSelect = new ComboBox("Time Interval:");
     private int selectedTimeInterval = -1;
@@ -56,7 +56,7 @@ public class AnalyzeView extends VerticalLayout implements View {
 
             ResultData resultData = new ResultData();
             try {
-                MarketBuildTraining.generate(symbol.getValue(), null, selectedTimeInterval, resultData, progress);
+                MarketBuildTraining.generate(symbol.getValue(), exchange.getValue(), null, selectedTimeInterval, resultData, progress);
 
                 progress.setProgress(100);
                 progress.updateProgress("Analysis complete.");
@@ -96,21 +96,6 @@ public class AnalyzeView extends VerticalLayout implements View {
                     vl.addComponent(dirMseLabel);
                 }
 
-                final ControllerChart controllerChart = new ControllerChart(resultData.getChartData());
-                controllerChart.setSizeFull();
-                vl.addComponent(controllerChart);
-                controllerChart.drawChart();
-                        Button load = new Button("Load");
-                        load.addClickListener(new ClickListener() {
-                            @Override
-                            public void buttonClick(ClickEvent event) {
-                                controllerChart.drawChart();
-                            }
-                        });
-                        
-                vl.addComponent(load);
-                
-
                 vl.addComponent(new HorizontalLayout() {
                     {
                         setMargin(true);
@@ -133,6 +118,10 @@ public class AnalyzeView extends VerticalLayout implements View {
 
                     }
                 });
+                
+
+                // Store result data
+                ((DashboardUI) getUI()).dataProvider.addResultData(symbol.getValue(), resultData);
 
                 getUI().getSession().lock();
                 try {
@@ -238,6 +227,12 @@ public class AnalyzeView extends VerticalLayout implements View {
         symbol.setWidth("300px");
         addComponent(symbol);
 
+        exchange = new TextField("Exchange:");
+        exchange.setInputPrompt("Enter exchange");
+        exchange.setWidth("300px");
+        addComponent(exchange);
+
+
         intervalSelect.setInputPrompt("Choose time interval");
         for (int i = 0; i < DataProvider.Config.TIME_INTERVAL.length; i++) {
             intervalSelect.addItem(DataProvider.Config.TIME_INTERVAL[i]);
@@ -259,33 +254,22 @@ public class AnalyzeView extends VerticalLayout implements View {
             }
         });
 
-
-        String initJS =
-                "var #id#_plot;"
-                + "var #id#_s1 = [10, 20, 4, 27, 50];"
-                + "var #id#_ticks = ['Fastest Run','Last Run','Current Run','Average Run','Slowest Run'];"
-                + "var #id#_plot_options = {"
-                + "seriesColors: ['#66FF66','#CD7DD1','#FFFF4D','#3366FF','#FF4D4D'],"
-                + "series: [{renderer: $.jqplot.BarRenderer,pointLabels: { show: false },rendererOptions: {barDirection: 'vertical',barPadding: 1,barWidth: 80,varyBarColor: true}}],"
-                + "title: 'Flowchart Runtime Comparison',"
-                + "axes: {xaxis: {label: 'Runs',labelRenderer: $.jqplot.CanvasAxisLabelRenderer,labelOptions: {fontSize: '9pt',fontFamily: 'Tahoma',angle: 0,fontWeight: 'normal',fontStretch: 1},renderer: $.jqplot.CategoryAxisRenderer,ticks: #id#_ticks, tickOptions: {fontSize: '8pt', fontFamily: 'Tahoma', angle: -60, fontWeight: 'normal', fontStretch: 1}}, yaxis: {label: 'Runtime (minutes)',labelRenderer: $.jqplot.CanvasAxisLabelRenderer,labelOptions: {fontSize: '9pt',fontFamily: 'Tahoma',angle: -90,fontWeight: 'normal',fontStretch: 1},min: 0, tickOptions: { show: true, fontSize: '8pt', fontFamily: 'Tahoma', angle: 0, fontWeight: 'normal', fontStretch: 1 } } },"
-                + "highlighter: {showMarker: false, showTooltip: false},"
-                + "cursor: { show: false } };"
-                + "$.jqplot.config.enablePlugins = true;"
-                + "try{ #id#_plot.target.empty(); #id#_plot.destroy(); }catch(e){}"
-                + "try{ #id#_plot = $.jqplot('#id#', [#id#_s1], #id#_plot_options); }catch(e){}";
-        String refreshJS = initJS;               
-        
-        Chart chart = new Chart(initJS, refreshJS, null, null);
-        addComponent(chart);
-        chart.drawChart();
-
         analyze.addStyleName("default");
         addComponent(analyze);
 
         analyze.addClickListener(new ClickListener() {
             @Override
             public void buttonClick(ClickEvent event) {
+
+                if (symbol.getValue() == null) {
+                    Notification.show("No symbol entered", "Please enter a commodity symbol.", Type.ERROR_MESSAGE);
+                    return;
+                }
+
+                if (exchange.getValue() == null) {
+                    Notification.show("No exchange entered", "Please enter an exchange.", Type.ERROR_MESSAGE);
+                    return;
+                }
 
                 if (selectedTimeInterval == -1) {
                     Notification.show("No time interval selected", "Please select a time interval.", Type.ERROR_MESSAGE);

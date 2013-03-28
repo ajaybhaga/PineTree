@@ -28,7 +28,7 @@ import com.bhaga.pinetree.nn.data.PrepareData;
 import com.bhaga.pinetree.nn.exception.NoDataException;
 import com.bhaga.pinetree.ui.Progress;
 import com.bhaga.pinetree.ui.data.DataProvider;
-import com.bhaga.pinetree.ui.data.ResultData;
+import com.bhaga.pinetree.nn.data.ResultData;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -86,7 +86,7 @@ public class MarketBuildTraining {
         return network;
     }
 
-    public static void generate(String symbol, File dataDir, int timeInterval, ResultData resultData, Progress progress) throws SOAPException, IOException, MalformedURLException, ParseException, NoDataException {
+    public static void generate(String symbol, String exchange, File dataDir, int timeInterval, ResultData resultData, Progress progress) throws SOAPException, IOException, MalformedURLException, ParseException, NoDataException {
 
         // Retrieve stock data from EOD web service
         final EODFinanceLoader loader = new EODFinanceLoader();
@@ -94,6 +94,9 @@ public class MarketBuildTraining {
         Calendar end = new GregorianCalendar();// end today
         Calendar begin = (Calendar) end.clone();
 
+        // Set time interval of result data
+        resultData.setTimeInterval(timeInterval);
+        
         int calendarType = 0;
         if (timeInterval == DataProvider.Config.TIME_INTERVAL_DAILY) {
             begin.add(Calendar.YEAR, -2);
@@ -106,8 +109,8 @@ public class MarketBuildTraining {
 
         // Prepare data inputs
         PrepareData prepareData = new PrepareData(loader, dataDir, calendarType, resultData, progress);
-        prepareData.load(symbol, begin.getTime(), end.getTime(), 1);
-        prepareData.load(symbol, begin.getTime(), end.getTime(), 2);
-        prepareData.load(symbol, begin.getTime(), end.getTime(), 4);
+        prepareData.load(symbol, exchange, begin.getTime(), end.getTime(), 1);
+        prepareData.load(symbol, exchange, begin.getTime(), end.getTime(), 2);
+        prepareData.load(symbol, exchange, begin.getTime(), end.getTime(), 4);
     }
 }

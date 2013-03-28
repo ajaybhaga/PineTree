@@ -5,6 +5,7 @@ package com.bhaga.pinetree.nn.Utility.loader;
 
 import com.bhaga.pinetree.nn.Utility.FileUtils;
 import com.bhaga.pinetree.nn.exception.NoDataException;
+import com.bhaga.pinetree.nn.exception.NotLoggedInException;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -17,6 +18,8 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.namespace.QName;
 import javax.xml.soap.MessageFactory;
 import javax.xml.soap.MimeHeaders;
@@ -31,17 +34,26 @@ import javax.xml.soap.SOAPMessage;
 import org.encog.ml.data.market.MarketDataType;
 import org.encog.ml.data.market.TickerSymbol;
 import org.encog.ml.data.market.loader.LoadedMarketData;
-import org.encog.ml.data.market.loader.MarketLoader;
 
 public class EODFinanceLoader {
 
     private final String dataWS = "http://ws.eoddata.com/data.asmx";
+    private final String loginTokenFilename = "login.token";
     private String loginToken;
 
     public EODFinanceLoader() throws SOAPException, IOException {
+        wsLogin(false);
+    }
 
+    private void wsLogin(boolean deleteToken) throws SOAPException, IOException {
         // Attempt to load existing token
-        File loginTokenFile = new File("login.token");
+        File loginTokenFile = new File(loginTokenFilename);
+
+        if (deleteToken) {
+            // Delete token and generate a new one
+            loginTokenFile.delete();
+        }
+
         try {
             loginToken = FileUtils.getContents(loginTokenFile, false);
             System.out.println("Using existing login token: " + loginToken);
@@ -110,7 +122,7 @@ public class EODFinanceLoader {
         FileUtils.setContents(loginTokenFile, loginToken);
     }
 
-    private Collection<LoadedMarketData> getData(final TickerSymbol ticker, Date from, Date to, int stepSize) throws SOAPException, MalformedURLException, IOException, ParseException, NoDataException {
+    private Collection<LoadedMarketData> getData(final TickerSymbol ticker, Date from, Date to, int stepSize) throws SOAPException, MalformedURLException, IOException, ParseException, NoDataException, NotLoggedInException {
 
         final Collection<LoadedMarketData> result = new ArrayList<LoadedMarketData>();
 
@@ -205,6 +217,13 @@ public class EODFinanceLoader {
         SOAPBody responseBody = response.getSOAPBody();
         SOAPBodyElement responseElement = (SOAPBodyElement) responseBody.getChildElements().next();
         SOAPElement returnElement = (SOAPElement) responseElement.getChildElements().next();
+
+        if (returnElement.hasAttribute("Message")) {
+            if (returnElement.getAttribute("Message").equals("Not logged in")) {
+                throw new NotLoggedInException("Not logged in");
+            }
+        }
+
         SOAPElement quotesElement = (SOAPElement) returnElement.getChildElements().next();
         Iterator it = quotesElement.getChildElements();
 
@@ -241,10 +260,10 @@ public class EODFinanceLoader {
 
             String str = String.format("Date: %s, Symbol: %s, Open: %s, High: %s, Low: %s, Close: %s, Volume: %s.", dateTimeStr, symbolStr, openStr, highStr, lowStr, closeStr, volumeStr);
             System.out.println(str);
-        }    
-        
+        }
+
         System.out.println("Data Set Returned Size: " + result.size());
-        
+
         if (result.isEmpty()) {
             System.out.println("Invalid exchange/symbol code!");
             throw new NoDataException("Invalid exchange/symbol code!");
@@ -266,7 +285,7 @@ public class EODFinanceLoader {
      */
     public Collection<LoadedMarketData> load(final TickerSymbol ticker,
             final Set<MarketDataType> dataNeeded, final Date from,
-            final Date to) throws SOAPException, MalformedURLException, IOException, ParseException, NoDataException {
+            final Date to) throws SOAPException, MalformedURLException, IOException, ParseException, NoDataException, NotLoggedInException {
         // Default to day
         return load(ticker, dataNeeded, from, to, Calendar.DATE);
     }
@@ -284,7 +303,19 @@ public class EODFinanceLoader {
     public Collection<LoadedMarketData> load(final TickerSymbol ticker,
             final Set<MarketDataType> dataNeeded, final Date from,
             final Date to, final int stepSize) throws SOAPException, MalformedURLException, IOException, ParseException, NoDataException {
-
-        return this.getData(ticker, from, to, stepSize);
+        try {
+            return this.getData(ticker, from, to, stepSize);
+        } catch (NotLoggedInException ex) {
+            // Login again and retry
+            wsLogin(true);
+            try {
+                return this.getData(ticker, from, to, stepSize);
+            } catch (NotLoggedInException ex1) {
+                System.out.println(ex1.getMessage());
+                System.exit(1);
+            }
+        }
+        
+        return null;
     }
 }

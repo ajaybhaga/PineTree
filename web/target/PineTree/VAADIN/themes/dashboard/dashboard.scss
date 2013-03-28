@@ -24,7 +24,7 @@
 @import "components/progressindicator.scss";
 
 @import "views/schedule.scss";
-@import "views/sales.scss";
+@import "views/results.scss";
 @import "views/reports.scss";
 @import "views/analyze.scss";
 
@@ -47,7 +47,7 @@
         @include dashboard-progressindicator;
 	
 	@include dashboard-schedule-view;
-	@include dashboard-sales-view;
+	@include dashboard-results-view;
 	@include dashboard-reports-view;
 	@include dashboard-analyze-view;
 
