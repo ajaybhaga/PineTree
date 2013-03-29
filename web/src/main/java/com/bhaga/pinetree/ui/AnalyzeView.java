@@ -10,8 +10,9 @@
 package com.bhaga.pinetree.ui;
 
 import com.bhaga.pinetree.nn.MarketBuildTraining;
-import com.bhaga.pinetree.ui.data.DataProvider;
+import com.bhaga.pinetree.nn.data.NNConfigData;
 import com.bhaga.pinetree.nn.data.ResultData;
+import com.bhaga.pinetree.ui.data.DataProvider;
 import com.bhaga.pinetree.ui.util.StringUtility;
 import com.github.wolfie.refresher.Refresher;
 import com.github.wolfie.refresher.Refresher.RefreshListener;
@@ -25,6 +26,7 @@ import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
@@ -48,6 +50,8 @@ public class AnalyzeView extends VerticalLayout implements View {
     private ComboBox intervalSelect = new ComboBox("Time Interval:");
     private int selectedTimeInterval = -1;
     long startTime = System.nanoTime();
+    // NN Config
+    NNConfigData nnConfigData = new NNConfigData();
 
     public class Worker extends Thread {
 
@@ -55,8 +59,9 @@ public class AnalyzeView extends VerticalLayout implements View {
         public void run() {
 
             ResultData resultData = new ResultData();
+
             try {
-                MarketBuildTraining.generate(symbol.getValue(), exchange.getValue(), null, selectedTimeInterval, resultData, progress);
+                MarketBuildTraining.generate(symbol.getValue(), exchange.getValue(), null, selectedTimeInterval, resultData, nnConfigData, progress);
 
                 progress.setProgress(100);
                 progress.updateProgress("Analysis complete.");
@@ -86,14 +91,16 @@ public class AnalyzeView extends VerticalLayout implements View {
                     vl.addComponent(titleLabel);
 
                     final Label dirPredictAccLabel = new Label();
-                    dirPredictAccLabel.setValue("Directional Prediction Accuracy: " + resultData.getDirPredictAcc()[i] + "%");
+                    dirPredictAccLabel.setValue("Directional Prediction Accuracy: " + (resultData.getDirPredictAcc()[i] * 100.0D) + "%");
                     vl.addComponent(dirPredictAccLabel);
-                    final Label mseLabel = new Label();
-                    mseLabel.setValue("MSE: " + resultData.getMse()[i]);
-                    vl.addComponent(mseLabel);
-                    final Label dirMseLabel = new Label();
-                    dirMseLabel.setValue("Directional MSE: " + resultData.getDirMse()[i]);
-                    vl.addComponent(dirMseLabel);
+
+                    final Label smapeLabel = new Label();
+                    smapeLabel.setValue("SMAPE: " + (resultData.getSMAPE()[i] * 100.0D) + "%");
+                    vl.addComponent(smapeLabel);
+
+                    final Label predictivePercLabel = new Label();
+                    predictivePercLabel.setValue("Predictive Percentage (Overall): " + (resultData.getPredictivePerc()[i] * 100.D) + "%");
+                    vl.addComponent(predictivePercLabel);
                 }
 
                 vl.addComponent(new HorizontalLayout() {
@@ -118,7 +125,7 @@ public class AnalyzeView extends VerticalLayout implements View {
 
                     }
                 });
-                
+
 
                 // Store result data
                 ((DashboardUI) getUI()).dataProvider.addResultData(symbol.getValue(), resultData);
@@ -154,6 +161,7 @@ public class AnalyzeView extends VerticalLayout implements View {
                 final TextArea errorTextArea = new TextArea();
                 errorTextArea.setSizeFull();
                 errorTextArea.setValue(e.getMessage());
+                e.printStackTrace();
                 vl.addComponent(errorTextArea);
 
                 vl.addComponent(new HorizontalLayout() {
@@ -253,6 +261,90 @@ public class AnalyzeView extends VerticalLayout implements View {
                 }
             }
         });
+
+        Label settingTitle = new Label("Neural Network Input Configuration");
+        settingTitle.addStyleName("h2");
+        addComponent(settingTitle);
+
+        CheckBox williamsRCheckBox = new CheckBox("Williams R", nnConfigData.getWilliamsR());
+        williamsRCheckBox.addValueChangeListener(new ValueChangeListener() {
+            public void valueChange(final ValueChangeEvent event) {
+                nnConfigData.setWilliamsR((Boolean) event.getProperty().getValue());
+            }
+        });
+        addComponent(williamsRCheckBox);
+
+        CheckBox williamsRScoreCheckBox = new CheckBox("Williams R Score", nnConfigData.getWilliamsRScore());
+        williamsRScoreCheckBox.addValueChangeListener(new ValueChangeListener() {
+            public void valueChange(final ValueChangeEvent event) {
+                nnConfigData.setWilliamsRScore((Boolean) event.getProperty().getValue());
+            }
+        });
+        addComponent(williamsRScoreCheckBox);
+
+        CheckBox cciCheckBox = new CheckBox("CCI", nnConfigData.getCCI());
+        cciCheckBox.addValueChangeListener(new ValueChangeListener() {
+            public void valueChange(final ValueChangeEvent event) {
+                nnConfigData.setCCI((Boolean) event.getProperty().getValue());
+            }
+        });
+        addComponent(cciCheckBox);
+
+        CheckBox mfiCheckBox = new CheckBox("MFI", nnConfigData.getMFI());
+        mfiCheckBox.addValueChangeListener(new ValueChangeListener() {
+            public void valueChange(final ValueChangeEvent event) {
+                nnConfigData.setMFI((Boolean) event.getProperty().getValue());
+            }
+        });
+        addComponent(mfiCheckBox);
+
+        CheckBox macdCheckBox = new CheckBox("MACD", nnConfigData.getMACD());
+        macdCheckBox.addValueChangeListener(new ValueChangeListener() {
+            public void valueChange(final ValueChangeEvent event) {
+                nnConfigData.setMACD((Boolean) event.getProperty().getValue());
+            }
+        });
+        addComponent(macdCheckBox);
+
+        CheckBox macdPeakCheckBox = new CheckBox("MACD Peak", nnConfigData.getMacdPeak());
+        macdPeakCheckBox.addValueChangeListener(new ValueChangeListener() {
+            public void valueChange(final ValueChangeEvent event) {
+                nnConfigData.setMacdPeak((Boolean) event.getProperty().getValue());
+            }
+        });
+        addComponent(macdPeakCheckBox);
+
+        CheckBox macdPeakScoreCheckBox = new CheckBox("MACD Peak Score", nnConfigData.getMacdPeakScore());
+        macdPeakScoreCheckBox.addValueChangeListener(new ValueChangeListener() {
+            public void valueChange(final ValueChangeEvent event) {
+                nnConfigData.setMacdPeakScore((Boolean) event.getProperty().getValue());
+            }
+        });
+        addComponent(macdPeakScoreCheckBox);
+
+        CheckBox macdZeroScoreCheckBox = new CheckBox("MACD Zero Score", nnConfigData.getMacdZeroScore());
+        macdZeroScoreCheckBox.addValueChangeListener(new ValueChangeListener() {
+            public void valueChange(final ValueChangeEvent event) {
+                nnConfigData.setMacdZeroScore((Boolean) event.getProperty().getValue());
+            }
+        });
+        addComponent(macdZeroScoreCheckBox);
+
+        CheckBox mfiCciZeroScoreCheckBox = new CheckBox("MFI CCI Zero Score", nnConfigData.getMfiCciZeroScore());
+        mfiCciZeroScoreCheckBox.addValueChangeListener(new ValueChangeListener() {
+            public void valueChange(final ValueChangeEvent event) {
+                nnConfigData.setMfiCciZeroScore((Boolean) event.getProperty().getValue());
+            }
+        });
+        addComponent(mfiCciZeroScoreCheckBox);
+
+        CheckBox candlesticksCheckBox = new CheckBox("Candlesticks", nnConfigData.getCandlesticks());
+        candlesticksCheckBox.addValueChangeListener(new ValueChangeListener() {
+            public void valueChange(final ValueChangeEvent event) {
+                nnConfigData.setCandlesticks((Boolean) event.getProperty().getValue());
+            }
+        });
+        addComponent(candlesticksCheckBox);
 
         analyze.addStyleName("default");
         addComponent(analyze);

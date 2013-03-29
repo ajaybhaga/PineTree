@@ -71,6 +71,10 @@ public class ResultsView extends VerticalLayout implements View {
                 tickerSymbolLabel.setValue("Ticker Symbol: " + resultData.getTickerSymbol());
                 runVL.addComponent(tickerSymbolLabel);
 
+                final Label numInputsLabel = new Label();
+                numInputsLabel.setValue("Number of inputs: " + resultData.getNumInputs());
+                runVL.addComponent(numInputsLabel);
+
                 for (int i = 0; i < resultData.getDirPredictAcc().length; i++) {
                     final Label titleLabel = new Label();
                     titleLabel.setContentMode(ContentMode.HTML);
@@ -78,14 +82,16 @@ public class ResultsView extends VerticalLayout implements View {
                     runVL.addComponent(titleLabel);
 
                     final Label dirPredictAccLabel = new Label();
-                    dirPredictAccLabel.setValue("Directional Prediction Accuracy: " + resultData.getDirPredictAcc()[i] + "%");
+                    dirPredictAccLabel.setValue("Directional Prediction Accuracy: " + (resultData.getDirPredictAcc()[i] * 100.0D) + "%");
                     runVL.addComponent(dirPredictAccLabel);
-                    final Label mseLabel = new Label();
-                    mseLabel.setValue("MSE: " + resultData.getMse()[i]);
-                    runVL.addComponent(mseLabel);
-                    final Label dirMseLabel = new Label();
-                    dirMseLabel.setValue("Directional MSE: " + resultData.getDirMse()[i]);
-                    runVL.addComponent(dirMseLabel);
+                    
+                    final Label smapeLabel = new Label();
+                    smapeLabel.setValue("SMAPE: " + (resultData.getSMAPE()[i] * 100.0D) + "%");
+                    runVL.addComponent(smapeLabel);
+                    
+                    final Label predictivePercLabel = new Label();
+                    predictivePercLabel.setValue("Predictive Percentage (Overall): " + (resultData.getPredictivePerc()[i] * 100.D) + "%");
+                    runVL.addComponent(predictivePercLabel);                                       
                 }
 
                 ControllerChart controllerChart = new ControllerChart(resultData.getChartData(1));

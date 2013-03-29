@@ -46,6 +46,7 @@ public class EODFinanceLoader {
     }
 
     private void wsLogin(boolean deleteToken) throws SOAPException, IOException {
+        System.out.println("Attempting to login to web service...");
         // Attempt to load existing token
         File loginTokenFile = new File(loginTokenFilename);
 

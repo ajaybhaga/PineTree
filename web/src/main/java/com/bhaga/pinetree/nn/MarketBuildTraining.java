@@ -24,6 +24,7 @@
 package com.bhaga.pinetree.nn;
 
 import com.bhaga.pinetree.nn.Utility.loader.EODFinanceLoader;
+import com.bhaga.pinetree.nn.data.NNConfigData;
 import com.bhaga.pinetree.nn.data.PrepareData;
 import com.bhaga.pinetree.nn.exception.NoDataException;
 import com.bhaga.pinetree.ui.Progress;
@@ -86,7 +87,7 @@ public class MarketBuildTraining {
         return network;
     }
 
-    public static void generate(String symbol, String exchange, File dataDir, int timeInterval, ResultData resultData, Progress progress) throws SOAPException, IOException, MalformedURLException, ParseException, NoDataException {
+    public static void generate(String symbol, String exchange, File dataDir, int timeInterval, ResultData resultData, NNConfigData nnConfigData, Progress progress) throws SOAPException, IOException, MalformedURLException, ParseException, NoDataException {
 
         // Retrieve stock data from EOD web service
         final EODFinanceLoader loader = new EODFinanceLoader();
@@ -108,7 +109,7 @@ public class MarketBuildTraining {
         }
 
         // Prepare data inputs
-        PrepareData prepareData = new PrepareData(loader, dataDir, calendarType, resultData, progress);
+        PrepareData prepareData = new PrepareData(loader, dataDir, calendarType, resultData, nnConfigData, progress);
         prepareData.load(symbol, exchange, begin.getTime(), end.getTime(), 1);
         prepareData.load(symbol, exchange, begin.getTime(), end.getTime(), 2);
         prepareData.load(symbol, exchange, begin.getTime(), end.getTime(), 4);
