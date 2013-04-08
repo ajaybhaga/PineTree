@@ -12,14 +12,15 @@ public class ResultData {
 
     public static final int NUM_DATA_SETS = 3;
     private String tickerSymbol;
-    private double dirPredictAcc[] = new double[NUM_DATA_SETS];    
+    private double dirPredictAcc[] = new double[NUM_DATA_SETS];
     private double mae[] = new double[NUM_DATA_SETS];
     private double mse[] = new double[NUM_DATA_SETS];
     private double dirMSE[] = new double[NUM_DATA_SETS];
     private double smape[] = new double[NUM_DATA_SETS];
     private double predictivePerc[] = new double[NUM_DATA_SETS];
+    private double networkError[] = new double[NUM_DATA_SETS];
     private int timeInterval = -1;
-    private HashMap<Integer,ChartData> chartDataHashMap = new HashMap<Integer,ChartData>();
+    private HashMap<Integer, ChartData> chartDataHashMap = new HashMap<Integer, ChartData>();
     private int numInputs = 0;
 
     public void setTickerSymbol(String tickerSymbol) {
@@ -33,7 +34,7 @@ public class ResultData {
     public double[] getDirPredictAcc() {
         return dirPredictAcc;
     }
-    
+
     public double[] getMAE() {
         return mae;
     }
@@ -45,19 +46,23 @@ public class ResultData {
     public double[] getDirMSE() {
         return dirMSE;
     }
-    
+
     public double[] getSMAPE() {
         return smape;
     }
-    
+
     public double[] getPredictivePerc() {
         return predictivePerc;
     }
     
+    public double[] getNetworkError() {
+        return networkError;
+    }
+
     public int getTimeInterval() {
         return timeInterval;
     }
-    
+
     public void setTimeInterval(int timeInterval) {
         this.timeInterval = timeInterval;
     }
@@ -69,15 +74,15 @@ public class ResultData {
     public Set<Integer> getChartDataKeySet() {
         return chartDataHashMap.keySet();
     }
-    
+
     public ChartData getChartData(int forwardStep) {
         return chartDataHashMap.get(forwardStep);
-    }       
-    
+    }
+
     public void setNumInputs(int numInputs) {
         this.numInputs = numInputs;
     }
-    
+
     public int getNumInputs() {
         return numInputs;
     }

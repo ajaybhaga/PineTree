@@ -78,9 +78,13 @@ public class ResultsView extends VerticalLayout implements View {
                 for (int i = 0; i < resultData.getDirPredictAcc().length; i++) {
                     final Label titleLabel = new Label();
                     titleLabel.setContentMode(ContentMode.HTML);
-                    titleLabel.setValue("<br />Iteration " + (i + 1) + "<br />");
+                    titleLabel.setValue("<br />Network " + (i + 1) + "<br />");
                     runVL.addComponent(titleLabel);
-
+                                        
+                    final Label networkErrorLabel = new Label();
+                    networkErrorLabel.setValue("Network Error: " + (resultData.getNetworkError()[i] * 100.0D) + "%");
+                    runVL.addComponent(networkErrorLabel);
+                    
                     final Label dirPredictAccLabel = new Label();
                     dirPredictAccLabel.setValue("Directional Prediction Accuracy: " + (resultData.getDirPredictAcc()[i] * 100.0D) + "%");
                     runVL.addComponent(dirPredictAccLabel);

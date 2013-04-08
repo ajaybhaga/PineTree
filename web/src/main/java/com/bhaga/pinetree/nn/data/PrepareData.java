@@ -151,6 +151,9 @@ public class PrepareData {
 
         progress.setProgress(initProgress + 33);
         progress.updateProgress("Training neural network (" + forwardStep + " timestamp forecast) complete.");
+        
+        // Store final network error
+        resultData.getNetworkError()[resultDataSet] = train.getError();
 
         //} while (train.getIteration() < 10000);
 
@@ -321,8 +324,8 @@ public class PrepareData {
          StochF stochF = new StochF("Stoch %K", inputClose.length);
          stochF.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
          stockIndicatorList.add(stochF);
-         */               
-        
+         */
+
         WilliamsR williamsR = new WilliamsR("Williams %R", inputClose.length);
         williamsR.setUseAsInput(nnConfigData.getWilliamsR());
         williamsR.calculate(inputHigh, inputLow, inputVolume, inputOpen, inputClose);
@@ -996,10 +999,16 @@ public class PrepareData {
                 System.out.println("Norm Values: " + stockIndicator.normValueToString());
             }
         }
-        
+
         int candlestickInputs = 6;
         if (!nnConfigData.getCandlesticks()) {
             candlestickInputs = 0;
+        }
+        
+        boolean addRandomInput = false;
+        if (inputIndicators == 0) {
+            inputIndicators++;
+            addRandomInput = true;
         }
 
         // Prepare the input data
@@ -1009,8 +1018,8 @@ public class PrepareData {
 
         double[][] inputO = new double[maxLength][inputIndicators + candlestickInputs];
         double[][] idealO = new double[maxLength][1];
-                            
-        // Set the number of inputs               
+
+        // Set the number of inputs
         resultData.setNumInputs(input[0].length);
 
         progress.setProgress(initProgress + 10);
@@ -1034,6 +1043,12 @@ public class PrepareData {
                     inputIndicatorsUsed++;
                 }
             }
+            
+            if (addRandomInput) {
+                input[j][0] = nextIntInRange(-500,500, rng);
+                System.out.println("Using random input.");
+            }
+                        
 
             if (nnConfigData.getCandlesticks()) {
                 inputO[j][inputIndicatorsUsed] = inputC0BodyColour[j];
@@ -1054,7 +1069,7 @@ public class PrepareData {
 
                 inputIndicatorsUsed += 6;
             }
-            
+
             //String inputStr;
             //inputStr = String.format("NN Original Data [" + j + "]: [%.2f, %.2f, %.2f, %.2f, %.2f, %.2f] -> [%.5f]", inputO[j][0], inputO[j][1], inputO[j][2], inputO[j][3], inputO[j][4], inputO[j][5], idealO[j][0]);
             //System.out.println(inputStr);
@@ -1137,6 +1152,7 @@ public class PrepareData {
             name = (String) objArray[0];
             value = (Double) objArray[1];
 
+            // Original
             forecast[j + forwardStep] = inputClose[j + maxBegIdx] + inputClose[j + maxBegIdx] * (value / 100.D);
 
             System.out.println("variation: " + value + "%");
@@ -1152,9 +1168,16 @@ public class PrepareData {
                 smapeNumer += Math.abs(inputClose[j + forwardStep + maxBegIdx] - forecast[j + forwardStep]);
                 smapeDenom += (inputClose[j + forwardStep + maxBegIdx] + forecast[j + forwardStep]);
 
-                System.out.println(String.format("DIRECTION COMPARE: inputClose [%.2f], direction [%.2f] ? forecast [%.2f], direction [%.2f]", inputClose[j + forwardStep + maxBegIdx], getDirection(inputClose[j + forwardStep + maxBegIdx] - inputClose[j + maxBegIdx]), forecast[j + forwardStep], getDirection(forecast[j + forwardStep] - inputClose[j + maxBegIdx])));
-
-                forecastDirectionError[j + forwardStep] = (getDirection(inputClose[j + forwardStep + maxBegIdx] - inputClose[j + maxBegIdx]) == getDirection(forecast[j + forwardStep] - inputClose[j + maxBegIdx])) ? 0 : 1;
+                //forecastDirectionError[j + forwardStep] = (getDirection(inputClose[j + forwardStep + maxBegIdx] - inputClose[j + maxBegIdx]) == getDirection(forecast[j + forwardStep] - forecast[j])) ? 0 : 1;
+                
+                double inputDelta = inputClose[j + forwardStep + maxBegIdx] - nextIntInRange(-100,100, rng);
+                double forecastDelta = forecast[j + forwardStep] - nextIntInRange(-100,100, rng);                
+                double lv = getDirection(inputDelta);
+                double rv = getDirection(forecastDelta);
+                forecastDirectionError[j + forwardStep] = (lv == rv) ? 0 : 1;
+                
+                System.out.println(String.format("DIRECTION COMPARE: inputDelta [%.2f], direction [%.2f] ? forecastDelta [%.2f], direction [%.2f]", inputDelta, lv, forecastDelta, rv));
+                                
                 directionalMse += Math.pow(forecastDirectionError[j + forwardStep], 2);
             }
         }
@@ -1177,9 +1200,9 @@ public class PrepareData {
                 correct++;
             }
         }
-        
+
         double dirPredictAcc = ((double) correct / (double) (forecast.length - forwardStep));
-        double predictivePerc = (1.0D-smape) * dirPredictAcc;
+        double predictivePerc = (1.0D - smape) * dirPredictAcc;
 
         // Store result data
         resultData.setTickerSymbol(ticker.getSymbol());
@@ -1189,6 +1212,22 @@ public class PrepareData {
         resultData.getDirMSE()[resultDataSet] = directionalMse;
         resultData.getSMAPE()[resultDataSet] = smape;
         resultData.getPredictivePerc()[resultDataSet] = predictivePerc;
-        
+
     }
+    
+    private Random rng = new Random();
+    int nextIntInRange(int min, int max, Random rng) {
+   if (min > max) {
+      throw new IllegalArgumentException("Cannot draw random int from invalid range [" + min + ", " + max + "].");
+   }
+   int diff = max - min;
+   if (diff >= 0 && diff != Integer.MAX_VALUE) {
+      return (min + rng.nextInt(diff + 1));
+   }
+   int i;
+   do {
+      i = rng.nextInt();
+   } while (i < min || i > max);
+   return i;
+}
 }
